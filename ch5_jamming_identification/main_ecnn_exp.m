@@ -239,7 +239,7 @@ for ri=1:length(train_ratios)
         train_ratios(ri)*100, mean(results_OA(ri,:)), mean(results_AA(ri,:)));
 end
 fprintf('=====================================\n');
-fprintf('结果已保存至 _复现工作/sim/fig5_13_ecnn_results.png\n');
+fprintf('结果已保存至 ./figs/fig5_13_ecnn_results.png\n');
 
 %% ===================== 局部函数 =====================
 function [t,S]=lfm_signal(Tp,B,fs,f0)

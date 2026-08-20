@@ -1,5 +1,5 @@
 %% main_gen_signals.m  —  生成九类干扰示例信号并绘制图5.3/5.4
-% 输出：_复现工作/sim/fig5_3_timedomain.png, fig5_4_spectrum.png
+% 输出: ./figs/fig5_3_timedomain.png, ./figs/fig5_4_spectrum.png
 % 本文件自包含（库函数以局部函数形式内联），无需额外addpath
 
 %% 1. 仿真参数（书179页表5.1设定）

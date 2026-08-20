@@ -201,7 +201,7 @@ xlabel('重要性得分'); title('图5.12  七维特征的重要性排序');
 grid on;
 saveas(gcf,'figs/fig5_12_feature_importance.png');
 
-fprintf('\n全部结果图已保存到 _复现工作/sim/\n');
+fprintf('\n全部结果图已保存到 ./figs/\n');
 
 %% ===================== 局部函数 =====================
 function [t,S]=lfm_signal(Tp,B,fs,f0)
