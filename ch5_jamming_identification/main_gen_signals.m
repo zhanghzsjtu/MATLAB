@@ -43,7 +43,7 @@ for i = 1:9
     grid on; axis tight;
 end
 sgtitle('图5.3 九类干扰信号示例的时域图（复现）','FontSize',13,'FontWeight','bold');
-saveas(gcf, 'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_3_timedomain.png');
+saveas(gcf, 'figs/fig5_3_timedomain.png');
 
 %% 4. 图5.4 频谱图
 Nfft = 2048;
@@ -58,7 +58,7 @@ for i = 1:9
     ylim([-60 5]); grid on;
 end
 sgtitle('图5.4 九类干扰信号示例的频谱图（复现）','FontSize',13,'FontWeight','bold');
-saveas(gcf, 'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_4_spectrum.png');
+saveas(gcf, 'figs/fig5_4_spectrum.png');
 
 fprintf('九类干扰示例信号与图5.3/5.4已生成完毕。\n');
 

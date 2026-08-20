@@ -229,7 +229,7 @@ xlabel('训练样本占比/%'); ylabel('平均精度(AA)/%');
 title('(b) ECNN平均分类精度AA'); grid on; xlim([0 10]); ylim([0 100]);
 
 sgtitle('图5.13  ECNN十二类干扰识别结果（复现）','FontSize',13,'FontWeight','bold');
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_13_ecnn_results.png');
+saveas(gcf,'figs/fig5_13_ecnn_results.png');
 
 % 打印最终结果表
 fprintf('\n========== ECNN最终结果汇总 ==========\n');

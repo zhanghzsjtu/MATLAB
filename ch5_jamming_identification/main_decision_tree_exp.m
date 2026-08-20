@@ -122,7 +122,7 @@ bd=[]; gd=[];
 for c=1:Nclasses, bd=[bd; F_energy(Y_label==c)]; gd=[gd; c*ones(sum(Y_label==c),1)]; end
 boxplot(bd,gd); xlabel('干扰类别编号'); ylabel('能量');
 title('图5.5  九类干扰信号的能量特征值'); grid on;
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_5_energy.png');
+saveas(gcf,'figs/fig5_5_energy.png');
 
 % 图5.6: 带宽
 figure('Position',[50 50 900 480]);
@@ -130,7 +130,7 @@ bd=[]; gd=[];
 for c=1:Nclasses, bd=[bd; F_bw(Y_label==c)]; gd=[gd; c*ones(sum(Y_label==c),1)]; end
 boxplot(bd,gd); xlabel('干扰类别编号'); ylabel('带宽/MHz');
 title('图5.6  九类不同干扰信号的带宽特征值'); grid on;
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_6_bandwidth.png');
+saveas(gcf,'figs/fig5_6_bandwidth.png');
 
 % 图5.7: 连续性系数(类1~4)
 figure('Position',[50 50 700 420]);
@@ -139,7 +139,7 @@ for c=[1 2 3 4], b7=[b7; F_n1(Y_label==c)]; g7=[g7; c*ones(sum(Y_label==c),1)]; 
 boxplot(b7,g7); xlabel('干扰类别'); ylabel('时域连续性系数 N_1');
 title('图5.7  第1~4类干扰的时域连续性系数');
 xticks(1:4); xticklabels({'1.全脉冲转发','2.密集转发','3.ISRJ','4.部分脉冲密集'}); grid on;
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_7_continuity.png');
+saveas(gcf,'figs/fig5_7_continuity.png');
 
 % 图5.8: MW(类2 vs 3)
 figure('Position',[50 50 550 380]);
@@ -147,7 +147,7 @@ boxplot([F_mw(Y_label==2);F_mw(Y_label==3)], [ones(sum(Y_label==2),1);2*ones(sum
 xlabel('干扰类别'); ylabel('采样窗均值 M_W');
 title('图5.8  第2类与第3类干扰的特征M_W');
 xticks([1 2]); xticklabels({'2.密集转发','3.ISRJ'}); grid on;
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_8_mw.png');
+saveas(gcf,'figs/fig5_8_mw.png');
 
 % 图5.9: 时宽(类5~9)
 figure('Position',[50 50 700 420]);
@@ -156,7 +156,7 @@ for c=[5 6 7 8 9], b9=[b9; F_tw(Y_label==c)]; g9=[g9; c*ones(sum(Y_label==c),1)]
 boxplot(b9,g9); xlabel('干扰类别'); ylabel('时宽/\mus');
 title('图5.9  第5~9类干扰的信号时宽');
 xticks(1:5); xticklabels({'5.灵巧噪声','6.噪声调频','7.宽带压制','8.扫频','9.梳状谱'}); grid on;
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_9_timewidth.png');
+saveas(gcf,'figs/fig5_9_timewidth.png');
 
 % 图5.10: 频域矩偏度(类7~9)
 figure('Position',[50 55 550 380]);
@@ -165,7 +165,7 @@ boxplot([F_sk(Y_label==7);F_sk(Y_label==8);F_sk(Y_label==9)], ...
 xlabel('干扰类别'); ylabel('频域矩偏度');
 title('图5.10  第7~9类干扰的频域矩偏度');
 xticks(1:3); xticklabels({'7.宽带压制','8.扫频','9.梳状谱'}); grid on;
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_10_skewness.png');
+saveas(gcf,'figs/fig5_10_skewness.png');
 
 % 图5.11: 局部矩偏度(类7 vs 8)
 figure('Position',[50 55 550 380]);
@@ -173,7 +173,7 @@ boxplot([F_n2(Y_label==7);F_n2(Y_label==8)], [ones(sum(Y_label==7),1);2*ones(sum
 xlabel('干扰类别'); ylabel('局部矩偏度 N_2');
 title('图5.11  第7类与第8类干扰的局部矩偏度');
 xticks([1 2]); xticklabels({'7.宽带压制','8.扫频'}); grid on;
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_11_local_skewness.png');
+saveas(gcf,'figs/fig5_11_local_skewness.png');
 
 % 混淆矩阵(fitctree结果)
 figure('Position',[50 60 650 550]);
@@ -185,13 +185,13 @@ title(sprintf('fitctree混淆矩阵 (OA=%.1f%%)', acc_A));
 for ii=1:size(conf_A,1), for jj=1:size(conf_A,2)
     text(jj,ii,sprintf('%d',conf_A(ii,jj)),'HorizontalAlignment','center','Color','w','FontSize',8);
 end, end
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig_confusion_matrix.png');
+saveas(gcf,'figs/fig_confusion_matrix.png');
 
 % 决策树可视化
 figure('Position',[80 60 900 600]);
 view(ctree_model,'Mode','graph');
 title(sprintf('自动决策树结构 (OA=%.1f%%)', acc_A));
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig_decision_tree_view.png');
+saveas(gcf,'figs/fig_decision_tree_view.png');
 
 % 特征重要性柱状图
 figure('Position',[80 60 800 420]);
@@ -199,7 +199,7 @@ barh(imp_sorted,'FaceColor',[0.2 0.5 0.8]);
 set(gca,'YTick',1:length(imp_order),'YTickLabel',feat_names(imp_order),'YDir','reverse');
 xlabel('重要性得分'); title('图5.12  七维特征的重要性排序');
 grid on;
-saveas(gcf,'D:/11-捷变雷达抗干扰与信号处理技术/_复现工作/sim/fig5_12_feature_importance.png');
+saveas(gcf,'figs/fig5_12_feature_importance.png');
 
 fprintf('\n全部结果图已保存到 _复现工作/sim/\n');
 
