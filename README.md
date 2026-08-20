@@ -8,3 +8,7 @@
 
 - 运行: `cd ch3` 后执行 `run_ch3` (100 次蒙特卡罗约 8 分钟)
 - 详见 ch3/README.md
+
+## 许可 License
+
+本仓库代码采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
