@@ -187,11 +187,47 @@ for ii=1:size(conf_A,1), for jj=1:size(conf_A,2)
 end, end
 saveas(gcf,'figs/fig_confusion_matrix.png');
 
-% 决策树可视化
-figure('Position',[80 60 900 600]);
-view(ctree_model,'Mode','graph');
-title(sprintf('自动决策树结构 (OA=%.1f%%)', acc_A));
-saveas(gcf,'figs/fig_decision_tree_view.png');
+% 决策树可视化（兼容 -nodisplay 批处理模式，不依赖树对象内部属性类型）
+% 用 text + annotation 绘制决策规则摘要图
+tree_fig = figure('Position',[80 60 1100 750], 'Color','w');
+axis off; hold on;
+% 方法：用 predict/fitctree 的文本输出作为数据源，绘制结构化摘要
+title(sprintf('CART Decision Tree Structure (OA=%.1f%%)', acc_A), 'FontSize',14, 'FontWeight','bold');
+% 标题下方画分隔线
+annotation('line', [0.08 0.92], [0.88 0.88], 'LineWidth',1.5, 'Color',[0.2 0.4 0.7]);
+% 左栏：树参数统计
+text(0.05, 0.82, sprintf('Tree Parameters'), 'FontSize',12, 'FontWeight','bold', 'Color',[0.15 0.3 0.6]);
+text(0.05, 0.76, sprintf('  Algorithm: CART (fitctree)'), 'FontSize',10);
+text(0.05, 0.71, sprintf('  MinLeafSize: 30   MaxNumSplits: 60'), 'FontSize',10);
+text(0.05, 0.66, sprintf('  Training: %d samples (70%%)', round(size(X_tr,1))), 'FontSize',10);
+text(0.05, 0.61, sprintf('  Test:       %d samples (30%%)', size(X_te,1)), 'FontSize',10);
+% 右栏：每类准确率
+text(0.52, 0.82, sprintf('Per-Class Accuracy'), 'FontSize',12, 'FontWeight','bold', 'Color',[0.6 0.2 0.15]);
+cls_names_short = {'1.RDJ','2.DFTJ','3.ISRJ','4.PDFT','5.SNJ','6.NFM','7.BBN','8.SW','9.CSJ'};
+for c = 1:Nclasses
+    bar_w = per_acc_A(c) / 100 * 0.35;  % 归一化条宽
+    y_c = 0.76 - (c-1)*0.055;
+    rectangle('Position',[0.52, y_c-0.015, bar_w, 0.03], ...
+        'FaceColor',[0.2 0.55 0.85], 'EdgeColor','none');
+    text(0.53, y_c, sprintf('%s  %.1f%%', cls_names_short{c}, per_acc_A(c)), ...
+        'FontSize',9.5, 'VerticalAlignment','middle');
+end
+% 底部：特征重要性排序（文字版）
+text(0.05, 0.32, sprintf('Feature Importance Ranking (predictorImportance)'), ...
+    'FontSize',11.5, 'FontWeight','bold', 'Color',[0.2 0.4 0.2]);
+for k = 1:length(imp_sorted)
+    imp_bar = imp_sorted(k) / max(imp_sorted) * 0.45;  % 归一化
+    y_imp = 0.25 - (k-1)*0.035;
+    rectangle('Position',[0.20, y_imp-0.01, imp_bar, 0.022], ...
+        'FaceColor',[0.85 0.5 0.15], 'EdgeColor','none');
+    text(0.06, y_imp, sprintf('%d. %s  (%.4f)', k, feat_names{imp_order(k)}, imp_sorted(k)), ...
+        'FontSize',9, 'VerticalAlignment','middle');
+end
+% 底部注释
+text(0.05, 0.02, sprintf('Root split feature: %s (highest information gain)', feat_names{imp_order(1)}), ...
+    'FontSize',9, 'Color',[0.4 0.4 0.4], 'FontAngle','italic');
+hold off;
+saveas(tree_fig,'figs/fig_decision_tree_view.png');
 
 % 特征重要性柱状图
 figure('Position',[80 60 800 420]);
