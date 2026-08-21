@@ -19,13 +19,12 @@ PyTorch 实现，在 RML2016.10b 数据集上复现。网络结构逐行提取�
 
 ## 复现结果（RML2016.10b，10 类，未归一化 I/Q，70/15/15 划分）
 
-| 指标（test 集） | 本文 PyTorch | MATLAB 参考实现 |
-|----------------|-------------|----------------|
-| 整体精度（micro） | 62.76% | 62.38% |
-| per-SNR 宏平均 | 62.87% | 62.49% |
-| 最优单 SNR 精度 | 92.90% @ +12 dB | 91.72% @ +12 dB |
+| 指标（test 集） | 数值 |
+|----------------|------|
+| 整体精度（micro） | 62.76% |
+| per-SNR 宏平均 | 62.87% |
+| 最优单 SNR 精度 | 92.90% @ +12 dB |
 
-两实现差异 < 0.4 个百分点，来源为 BN 统计量估计与 GELU tanh 近似的微小数值差。
 与论文报告 94.4% 的差距来自数据口径（本文 10 类 / 未归一化 / 70-15-15，
 论文为 11 类 / 归一化 / 不同验证划分），并非实现错误。
 
@@ -39,6 +38,11 @@ python train.py dataset2016b.h5
 
 # 测试集 per-SNR 评估，结果存 per_snr_test_pytorch.npz
 python eval.py dataset2016b.h5 test
+
+# 可视化（需先完成训练得到 dtnet_best_pytorch.pt）
+python plot_train_curve.py   # fig_train_curve.png 训练曲线
+python fig_snr.py            # fig_snr.png per-SNR 准确率
+python fig_signal.py         # fig_waveform.png 时域波形 + fig_confusion.png 混淆矩阵
 ```
 
 数据集 `dataset2016b.h5` 需自行从 RML2016.10b 官方来源获取，放在仓库根目录
