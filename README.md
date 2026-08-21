@@ -36,6 +36,15 @@
 - Vivado xsim: 将 `rtl/rtl_vec/` 下三个 hex 复制到 xsim 工作目录 `rtl_vec/` 后 `run all`
 - 详见 mgs_qr_decomposition/README.md
 
+## dtnet-rml2016-pytorch - DTNet 调制识别 PyTorch 复现
+
+基于 PyTorch 的 DTNet（原论文记作 HSE）在 RML2016.10b 数据集上的调制识别复现: 双流嵌入 + SFE 多尺度特征扩展 + Transformer 长程建模 + split-MLP 轻量分类头，10 类调制（BPSK/QPSK/8PSK/QAM16/QAM64/PAM4/WBFM/CPFSK/GFSK/AM-DSB）。训练管线采用 AMP 混合精度、fused Adam、DataLoader 并行与 cuDNN benchmark 加速，20 epoch 约 14 分钟（RTX 4060 Laptop）。含训练曲线、per-SNR 准确率、时域波形、混淆矩阵四类由代码生成的中文标注图。
+
+- 运行: `cd dtnet-rml2016-pytorch` 后执行 `pip install -r requirements.txt`，再 `python train.py dataset2016b.h5`
+- 测试集评估: `python eval.py dataset2016b.h5 test`；可视化: `python plot_train_curve.py`、`python fig_snr.py`、`python fig_signal.py`
+- 复现精度: test 整体 62.76%，per-SNR 宏平均 62.87%，最优单 SNR 92.90% @ +12 dB
+- 详见 dtnet-rml2016-pytorch/README.md 与 DTNet_RML2016_CSDN博客.md
+
 ## 许可 License
 
 本仓库代码采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
