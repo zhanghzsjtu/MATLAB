@@ -92,23 +92,66 @@ PyTorch 训练 20 epoch、batch 2048、AMP，约 14 分钟。
 - WBFM 与 CPFSK 之间也有少量互混。
 - PAM4、QAM64 的对角线比例相对较高，说明模型对这两类的识别相对稳定。
 
-## 5. 训练加速做法
+## 5. 训练加速做法：具体怎么改的
 
-复现训练只用了约 14 分钟（20 epoch、batch 2048，单张 RTX 4060 Laptop）。这不是因为模型小到可以忽略，而是训练管线做了四项针对性加速。它们只改变计算的执行方式，**不改变网络结构、不改变每层输出的数值语义**，因此复现结果与原始实现仍然可直接对照。
+复现训练只用了约 14 分钟（20 epoch、batch 2048，单张 RTX 4060 Laptop）。这不是模型小到可以忽略，而是训练管线做了四项针对性加速。它们只改变计算的执行方式，**不改变网络结构、不改变每层输出的数值语义**，因此复现结果与原始实现仍然可直接对照。下面逐项说明改了脚本的哪一段、GPU 上发生了什么。
 
-| 加速项 | 做法 | 作用 |
-|--------|------|------|
-| AMP 混合精度 | 前向/反向用 fp16 Tensor Core，缩放器保护梯度 | 利用 GPU 半精度单元，吞吐约 2~3 倍 |
-| fused Adam | 保留原版 `Adam + weight_decay` 语义，仅融合内核 | 优化器更新一步完成，减少显存往返 |
-| DataLoader 并行 | `num_workers=4` + `pin_memory` + `persistent_workers` | CPU 预取样本，GPU 不空等 |
-| cuDNN benchmark | 自动选择当前输入尺寸下最快的卷积/矩阵乘内核 | 固定结构下持续收益 |
+### 5.1 AMP 混合精度
 
-有两项常见的加速手段**有意没有采用**：
+**改了什么**：训练循环的前向与反向包进 `torch.amp.autocast('cuda')`，并配一个 `GradScaler` 做梯度缩放。
 
-- **FlashAttention**：本模型注意力序列仅 25 个 token（25×25 注意力矩阵），FlashAttention 针对长序列的内存优化在此几乎无收益，且会引入与原实现的数值差异。
-- **torch.compile**：首次编译开销大，且可能改变某些算子的数值行为。
+```python
+scaler = torch.amp.GradScaler('cuda')
+with torch.amp.autocast('cuda', enabled=use_amp):
+    logits = model(xb)
+    loss = crit(logits, yb)
+scaler.scale(loss).backward()
+scaler.step(optim)
+scaler.update()
+```
 
-不采用的理由是一致的——网络定义保持与原始实现逐结构一致，这是和 MATLAB 版互证的根基；加速只发生在训练管线上，不碰网络本体。
+**为什么快**：现代 NVIDIA GPU（RTX 40 系为 Ada 架构）有一组专门的 **Tensor Core**，做矩阵乘法时用 fp16（半精度，2 字节）比默认 fp32（单精度，4 字节）快约 2~3 倍，且显存占用减半。但 fp16 动态范围小，梯度太小会被舍成 0——`GradScaler` 先把损失乘一个大的比例因子再反向，让梯度落在 fp16 可表示的范围，更新前再除回来，从而兼顾速度与数值稳定。我们只在卷积、矩阵乘这些 Tensor Core 擅长的算子用 fp16，softmax、LayerNorm 等仍走 fp32，避免精度异常。
+
+### 5.2 fused Adam
+
+**改了什么**：优化器仍用原版的 `Adam + weight_decay` 语义，只是把内核融合。
+
+```python
+optim = torch.optim.Adam(model.parameters(), lr=4e-3, weight_decay=1e-4,
+                         fused=torch.cuda.is_available())
+```
+
+**为什么快**：普通 `Adam` 的"算梯度一阶矩/二阶矩 → 更新参数」每一步都是独立 kernel，要在显存里反复读写参数和动量。加 `fused=True` 后，PyTorch 把这几步合并成一个 CUDA kernel，参数只载入一次、更新完直接写回，少了多次显存往返。我们用 `try/except` 包住，万一当前 PyTorch 版本没有融合内核就退回普通 Adam，不影响正确性。权重衰减项的系数 `1e-4`、学习率 `4e-3` 都和原版一致，所以更新的数学结果不变，只是执行更紧凑。
+
+### 5.3 DataLoader 并行预取
+
+**改了什么**：构造数据加载器时开了多进程与锁页内存。
+
+```python
+loader = DataLoader(ds, batch_size=2048, shuffle=True,
+                    num_workers=4, pin_memory=True, persistent_workers=True)
+```
+
+**为什么快**：默认 DataLoader 在主进程里读 h5、做归一化、组 batch，CPU 干活时 GPU 在空等。开 `num_workers=4` 后，4 个子进程在后台并行把下一批样本准备好；`pin_memory=True` 把张量锁在页锁定内存，GPU 用 DMA 直接搬、省掉一次拷贝；`persistent_workers=True` 让子进程在整个训练期不销毁重建，避免每个 epoch 重复 fork 的开销。效果是 GPU 几乎不空等，计算墙时间被压到接近纯前向/反向耗时。
+
+### 5.4 cuDNN benchmark
+
+**改了什么**：训练开始前一行开关。
+
+```python
+torch.backends.cudnn.benchmark = True
+```
+
+**为什么快**：cuDNN 对同一个卷积/矩阵乘有多种实现（不同分块、不同算法），耗时差异可达数倍。`benchmark=True` 让它在训练初期用一小批数据实测各实现的速度、记住最快的那个，之后固定复用。代价是启动慢几秒，但本模型结构固定、要跑 20 epoch，这笔开销很快摊平。若输入尺寸每步都在变（如动态序列长度），则不适合开——这里 128 长 I/Q 序列固定，所以稳定受益。
+
+### 5.5 有意不做的两项
+
+有两項常见的加速手段**没有采用**，理由一致——网络定义必须与原始 ipynb 逐结构一致，这是和 MATLAB 版互证的根基；加速只动训练管线，不碰网络本体。
+
+- **FlashAttention**：本模型注意力序列仅 25 个 token（25×25 注意力矩阵），FlashAttention 针对长序列的内存优化在这里几乎无收益，且会引入与原实现的数值差异。
+- **torch.compile**：首次编译开销大，且可能改变某些算子的数值行为，作为增量实验更合适，不在基础复现版启用。
+
+梯度累积也曾考虑——但 batch 2048 在本模型上显存占用 < 2 GB，8 GB 显存完全够，无需靠累积来撑大有效 batch，故不加。
 
 ## 6. 为什么高 SNR 效果好
 
