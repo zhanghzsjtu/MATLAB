@@ -5,6 +5,7 @@ dataset2016b_small.h5
 # 训练产物
 dtnet_best_pytorch.pt
 per_snr_*_pytorch.npz
+confusion_test_pytorch.npz
 
 # 评估/对比中间文件（由 .mat / .npz 派生，非源码）
 per_snr_test_matlab.mat
