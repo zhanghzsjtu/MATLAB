@@ -27,6 +27,15 @@
 - 验证结论: 杂波抑制 64.0 dB、目标/杂波比 34.7 dB、RTL 与黄金逐点 ±1 LSB 内 100%
 - 详见 STAP/README.md
 
+## mgs_qr_decomposition - MGS-QR 分解与增量更新
+
+基于修正 Gram-Schmidt（MGS）的 QR 分解: 面向原子支撑集（OMP 等匹配追踪算法）的 QR 分解与增量更新。包含 MATLAB 参考实现（gs_qr / gs_qr_update / 完整测试）与 Q1.15 定点的 Verilog 三段式状态机实现（8 态独热，30 拍 MSB-first 恢复除法）。iverilog 12.0 与 Vivado 2022.1 xsim 双工具链验证，Q(32 项) 与 R(10 项) 全部逐位一致（ALL MATCH PASS）。
+
+- MATLAB 测试: `cd mgs_qr_decomposition` 后执行 `run test_gs_qr.m`（R2025b 实测）
+- Verilog 仿真: `cd mgs_qr_decomposition/rtl` 后执行 `iverilog -g2012 -o qr_sim.vvp qr_decompose_mgs.v tb_qr_decompose_mgs.v && vvp qr_sim.vvp`
+- Vivado xsim: 将 `rtl/rtl_vec/` 下三个 hex 复制到 xsim 工作目录 `rtl_vec/` 后 `run all`
+- 详见 mgs_qr_decomposition/README.md
+
 ## 许可 License
 
 本仓库代码采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
