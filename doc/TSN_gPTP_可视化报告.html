@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSN 802.1AS gPTP 可视化分析报告</title>
+<style>
+  :root{--blue:#0072BD;--orange:#D95319;--ink:#1f2d3d;--muted:#5a6675;--line:#e3e9f0;--bg:#f6f8fb;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,"Segoe UI","Microsoft YaHei",Consolas,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7;}
+  .hero{background:linear-gradient(120deg,#08305a 0%,#0072BD 55%,#0a4a82 100%);color:#fff;padding:40px 48px 32px;}
+  .hero h1{margin:0 0 8px;font-size:26px;font-weight:800;letter-spacing:.5px;}
+  .hero p{margin:4px 0;opacity:.92;font-size:14px;}
+  .hero .badge{display:inline-block;margin-top:14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);padding:5px 14px;border-radius:20px;font-size:13px;margin-right:8px;}
+  .toc{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 48px;font-size:13px;z-index:10;}
+  .toc a{color:var(--blue);text-decoration:none;margin-right:18px;white-space:nowrap;}
+  .toc a:hover{text-decoration:underline;}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 48px 80px;}
+  section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:26px 30px;margin:22px 0;box-shadow:0 1px 3px rgba(20,40,80,.04);}
+  h2{font-size:20px;margin:0 0 6px;color:var(--blue);border-left:5px solid var(--orange);padding-left:12px;}
+  h3{font-size:15px;color:var(--ink);margin:22px 0 8px;}
+  p{font-size:14px;color:#33414f;}
+  .fig{margin:18px 0;text-align:center;}
+  .fig img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;}
+  .cap{font-size:12px;color:var(--muted);margin-top:6px;}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0;}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;}
+  th{background:#eef4fb;color:var(--blue);font-weight:700;}
+  tr:nth-child(even) td{background:#fafcfe;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:880px){.grid2{grid-template-columns:1fr;}.wrap{padding:20px;}.toc{padding:10px 20px;}}
+  .tag{display:inline-block;background:#eef4fb;color:var(--blue);border:1px solid #cfe0f2;border-radius:4px;padding:1px 7px;font-size:12px;margin:2px 3px;}
+  .ok{color:#2ca02c;font-weight:700;}
+  .note{background:#fff8ef;border-left:4px solid var(--orange);padding:10px 14px;font-size:13px;color:#5a4a3a;border-radius:0 6px 6px 0;margin:12px 0;}
+  .kv{font-size:13px;}
+  .kv b{color:var(--blue);}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>TSN 802.1AS gPTP 交换机端口时间同步 — 可视化分析报告</h1>
+  <p>OpenTSN 风格实现 · 纯逻辑可综合 · 9 模块 / 9 分层 testbench / 9/9 PASS</p>
+  <p>本报告对应设计文档第 8 节：含架构数据流、状态机、真实仿真波形、同步前后对比、模块职责、OpenTSN 对照、创新点、子模块因果链。</p>
+  <div>
+    <span class="badge">仿真: iverilog 12 (-g2012)</span>
+    <span class="badge">回归: PASS=9 FAIL=0</span>
+    <span class="badge">规范: Verilog 编码规范（铁律）</span>
+  </div>
+</div>
+<div class="toc">
+  <a href="#a1">1 系统架构</a><a href="#a2">2 状态机总览</a><a href="#a3">3 分层验证波形</a>
+  <a href="#a4">4 同步前后对比</a><a href="#a5">5 模块职责</a><a href="#a6">6 OpenTSN 对照</a>
+  <a href="#a7">7 创新点</a><a href="#a8">8 子模块因果链</a><a href="#a9">9 验证结论</a>
+</div>
+<div class="wrap">
+
+<section id="a1">
+  <h2>1. 系统架构与数据流</h2>
+  <p>本工程是一个<b>纯 FPGA 逻辑实现</b>：所有模块（PHC / HTSU / TC / Pdelay / BMCA / Servo / MAC 胶合）均为可综合 Verilog，在单芯片内完成 gPTP 时间同步；验证侧采用 iverilog 分层 testbench 作为仿真兜底。单端口由 <code>gptp_top</code> 集成，多端口由 <code>gptp_switch</code> 用 <code>generate</code> 例化 N 份并共享一个 PHC，输出的 GM 时间可供给片上 802.1Qbv TAS 调度单元消费。</p>
+  <div class="grid2">
+    <div class="fig"><img src="img/arch_single.svg"><div class="cap">图1 单端口数据流：MAC 进 → 时间戳/透明钟/Pdelay/BMCA/Servo → PHC → MAC 出</div></div>
+    <div class="fig"><img src="img/arch_switch.svg"><div class="cap">图2 多端口交换机：N 端口共享 PHC，每端口独立 top+bmca+servo，输出 GM 时间供 TAS</div></div>
+  </div>
+  <div class="note">关键数据流：RX 帧经 <code>mac_glue</code> 识别 0x88F7 → HTSU 在 SOF 硬打戳 (t2/t3) → TC 累加 residence 到 correctionField → Pdelay 测 P2P 链路不对称 → BMCA 选 GM → Servo 用 Sync offset 闭环调 PHC（adjtime/adjfine）→ 统一时间面经 TX 出帧。</div>
+</section>
+
+<section id="a2">
+  <h2>2. 各模块三段式状态机总览</h2>
+  <p>全部时序模块严格采用用户 Verilog 铁律：<b>状态寄存器块仅更新 <code>state_c</code>；组合块用 <code>case</code> 计算 <code>state_n</code>（default=<code>P_ST_IDLE</code>）；输出块单信号 if-else</b>。状态常量以 <code>P_ST_</code> 前缀 + 独热编码，跳转条件用独立 <code>p_st_&lt;src&gt;2p_st_&lt;dst&gt;_start</code> wire 声明。</p>
+  <div class="fig"><img src="img/fsm_overview.svg"><div class="cap">图3 HTSU(4态)/Pdelay(5态)/BMCA(3态)/Servo(3态)/MAC glue(3态) 状态机与跳转</div></div>
+</section>
+
+<section id="a3">
+  <h2>3. 分层验证波形（由底向上，真实仿真抽取）</h2>
+  <p>以下 8 张波形均由对应 testbench 的 <code>.vcd</code> 真实仿真数据渲染（非手绘示意）。每个 tb 含明确的 <code>[PASS]/[FAIL]</code>，任一层失败可一眼定位。</p>
+  <h3>3.1 基础时钟 PHC</h3>
+  <div class="fig"><img src="img/wave_phc.svg"><div class="cap">图4 PHC 自由运行计数(time_ns) + 调相(adjtime_wr)/调频(adjfine_wr) 脉冲</div></div>
+  <h3>3.2 硬件时间戳 HTSU</h3>
+  <div class="fig"><img src="img/wave_htsu.svg"><div class="cap">图5 RX/TX SOF 锁存 t2/t3，EOF 算 residence_ns</div></div>
+  <h3>3.3 透明钟 TC（one/two-step）</h3>
+  <div class="fig"><img src="img/wave_tc.svg"><div class="cap">图6 pkt_vld → one-step cf_wr / two-step cf_rd 回读脉冲，cf_out 改写</div></div>
+  <h3>3.4 P2P 对等延迟 Pdelay</h3>
+  <div class="fig"><img src="img/wave_pdelay.svg"><div class="cap">图7 Req/Resp/RespFU 交换 → peer_delay_ns</div></div>
+  <h3>3.5 最佳主时钟 BMCA</h3>
+  <div class="fig"><img src="img/wave_bmca.svg"><div class="cap">图8 Announce → 角色(2:Passive / 1:Slave / 0:Master) + is_gm</div></div>
+  <h3>3.6 PI 伺服环 Servo</h3>
+  <div class="fig"><img src="img/wave_servo.svg"><div class="cap">图9 Sync → adjtime/adjfine 闭环，locked 置位</div></div>
+  <h3>3.7 MAC 胶合</h3>
+  <div class="fig"><img src="img/wave_mac_glue.svg"><div class="cap">图10 帧流 SOP/EOP/VLD 识别 → CF 字节级改写(cf_wr)</div></div>
+  <h3>3.8 多端口交换机 Switch</h3>
+  <div class="fig"><img src="img/wave_switch.svg"><div class="cap">图11 共享 GM 时间基准(gm_time_ns) + TX 转发流(tx_vld) + servo 仲裁(phc_adjtime_wr) + is_gm</div></div>
+  <div class="note">图11 同时证明了两项待办闭合：<b>待办① 真实 TX 转发</b>（tx_vld 在收帧后出现转发流，不再复用 RX 边沿）；<b>待办② servo 仲裁</b>（仅 owner 端口的写透传至 PHC，phc_adjtime_wr 仅跟随选中端口）。</div>
+</section>
+
+<section id="a4">
+  <h2>4. 同步前 vs 同步后对比</h2>
+  <p>未同步时各端口独立晶振导致频率/相位发散，跨跳抖动逐跳累积；经 Servo 闭环（adjtime 消除稳态、adjfine 消除频偏）后，全网对齐到 GM 时间面，残余仅剩链路不对称（由 Pdelay 测得，约数十 ns）。</p>
+  <div class="fig"><img src="img/sync_compare.svg"><div class="cap">图12 左：时钟发散(offset 累积)；右：收敛到 GM(offset≈0)</div></div>
+</section>
+
+<section id="a5">
+  <h2>5. 9 个模块职责与关系</h2>
+  <table>
+    <tr><th>模块</th><th>职责</th><th>上游</th><th>下游</th><th>关键输出</th></tr>
+    <tr><td><b>gptp_defines</b></td><td>全局参数/报文类型/定点格式</td><td>—</td><td>全部</td><td>宏定义(无逻辑)</td></tr>
+    <tr><td><b>gptp_phc</b></td><td>自由运行高精度时钟(DDS 分数累加)</td><td>adjtime/adjfine/settime</td><td>HTSU/TC/Servo</td><td>time_ns/time_frac</td></tr>
+    <tr><td><b>gptp_htsu</b></td><td>MAC wire-side SOF 硬打戳 t2/t3 + residence</td><td>PHC/i_rx_sof</td><td>TC</td><td>rx_ts/tx_ts/residence</td></tr>
+    <tr><td><b>gptp_tc</b></td><td>one/two-step correctionField 改写</td><td>residence/peer_delay</td><td>MAC TX</td><td>cf_out/cf_wr/cf_rd</td></tr>
+    <tr><td><b>gptp_pdelay</b></td><td>P2P 强制对等延迟测量</td><td>对端 Resp/RespFU</td><td>TC/Servo</td><td>peer_delay_ns</td></tr>
+    <tr><td><b>gptp_bmca</b></td><td>最佳主时钟选举(Best Master)</td><td>Announce</td><td>Servo/PHC owner</td><td>port_role/is_gm</td></tr>
+    <tr><td><b>gptp_servo</b></td><td>PI 闭环 offset→PHC 修正</td><td>Sync/t1/t2/cf</td><td>PHC</td><td>adjtime/adjfine/locked</td></tr>
+    <tr><td><b>gptp_mac_glue</b></td><td>0x88F7 解析/msgType/CF 字节改写</td><td>MAC 字节流</td><td>HTSU/TC</td><td>rx_sof/msg_type/cf_wr</td></tr>
+    <tr><td><b>gptp_top</b></td><td>单端口顶层集成</td><td>MAC 边沿</td><td>switch</td><td>时间戳/CF 握手/Pdelay</td></tr>
+    <tr><td><b>gptp_switch</b></td><td>多端口共享 PHC + 仲裁</td><td>N×top/bmca/servo</td><td>片上 TAS 调度</td><td>gm_time/port_role</td></tr>
+  </table>
+</section>
+
+<section id="a6">
+  <h2>6. 与国防科大 OpenTSN 逐项对照</h2>
+  <table>
+    <tr><th>维度</th><th>OpenTSN 原版</th><th>本实现</th><th>差异说明</th></tr>
+    <tr><td>同步算法</td><td>E2E: ((t2+t3)-(t1+t4))/2</td><td>P2P: ((t4-t1)-(t3-t2))/2</td><td>按 802.1AS 强制 Pdelay</td></tr>
+    <tr><td>时间戳分辨率</td><td>125MHz → 8ns 粒度</td><td>125MHz + 32-bit 分数累加器</td><td>平均 sub-ns 频率分辨率</td></tr>
+    <tr><td>透明钟</td><td>two-step(补 Follow_Up)</td><td>one-step + two-step 双模</td><td>在线改写 CF，无需补帧</td></tr>
+    <tr><td>架构映射</td><td>PTP_CTRL/CYC_SYNC/RX_PROC/TX_PROC</td><td>PTP_CTRL→bmca, CYC_SYNC→phc, RX/TX_PROC→htsu/glue</td><td>接口/架构对齐 FAST</td></tr>
+    <tr><td>编码规范</td><td>原始</td><td>用户 Verilog 铁律(r_/w_/ro_/P_ST_/三段式)</td><td>统一规范，跨项目复用</td></tr>
+    <tr><td>仿真验证</td><td>—</td><td>9 分层 tb 由底向上 + 9/9 PASS</td><td>明确 PASS/FAIL 自检</td></tr>
+  </table>
+</section>
+
+<section id="a7">
+  <h2>7. 创新点 / 功能点</h2>
+  <p>
+    <span class="tag">P2P 强制测延迟</span><span class="tag">one/two-step 双模 TC</span>
+    <span class="tag">32-bit DDS 分数时钟</span><span class="tag">BMCA Passive 最优下一跳</span>
+    <span class="tag">三段式 FSM 统一</span><span class="tag">共享 PHC + servo 仲裁</span>
+    <span class="tag">真实 TX 转发(非 RX 复用)</span><span class="tag">CDC 两级同步预留</span>
+    <span class="tag">由底向上分层验证</span><span class="tag">Verilog 铁律合规</span>
+  </p>
+  <div class="note">相对 OpenTSN 的三个实质差异（P2P 算法、sub-ns 分数分辨率、one-step TC）是守"50ns 同步"指标的关键；servo 仲裁 + 真实 TX 转发是交换机级可扩展性的落点。</div>
+</section>
+
+<section id="a8">
+  <h2>8. 每个子模块为何不可或缺（因果链）</h2>
+  <p>任一模块缺失都将导致 50ns 同步目标失效。下图给出"缺一则失效"的因果链。</p>
+  <div class="fig"><img src="img/causal_chain.svg"><div class="cap">图13 子模块不可或缺性：BMCA 选基准 → HTSU 硬打戳 → Pdelay 消不对称 → TC 抹抖动 → Servo 收敛 → glue 接入帧 → PHC 统一面</div></div>
+</section>
+
+<section id="a9">
+  <h2>9. 验证结论</h2>
+  <p class="kv">
+    <b>回归结果：</b><span class="ok">PASS=9 FAIL=0</span>（iverilog 12，-g2012，一次跑齐 9 个分层 tb）。<br>
+    <b>规范合规：</b>10 个可综合模块全部满足 Verilog 编码规范（端口对齐 / 分组注释 / r_·w_·ro_ 前缀 / 三段式 FSM / P_ST_ 独热 / 独立跳转条件 wire / i_clk-i_rst 异步复位 'd0 / 单信号 always / inst 组括号对齐 / 位宽基数常数）。<br>
+    <b>待办闭合：</b>4 个待办（switch 真实 TX 转发、servo 仲裁、CDC 两级同步、顶层 HTSU 时间戳引出）+ 5 项后续建议（bmca Passive 测试、TC 双模、switch residence、servo 仲裁验证、MAC CF 字节改写）均已实现并有 tb 覆盖。<br>
+    <b>配套交付：</b>本可视化报告（架构/状态机/波形/对比/因果链 + 7 张表）、验收报告、设计检查报告，详见 <code>doc/</code> 目录。
+  </p>
+</section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# 仿真编译产物
+sim/*.vvp
+sim/*.vcd
+sim/*.log
+
+# 压缩包
+*.zip
+
+# 编辑器/OS 临时文件
+*.swp
+.DS_Store
