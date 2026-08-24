@@ -4,7 +4,7 @@
 // 目标: 验证 GM 交换机 (A) 主动发 Sync/Follow_Up 经线缆到下游
 //       Slave 交换机 (B); B 的透明钟 (TC) 把本机驻留时间 (residence)
 //       叠加到 correctionField 并转发; 验证 CF 跨级链式累积与
-//       originTimestamp 正确传递 (GM 时间基准透传)。
+//       originTimestamp 正确传递 (GM time base透传)。
 // 不修改 RTL, 仅验证现有链路级联正确性。
 /////////////////////////////////////////////////////////////////
 `timescale 1ns/1ps
@@ -61,6 +61,9 @@ module tb_gptp_cascade;
     wire        tie0_1b [0:NPORTS-1];
     wire [`GPTT_TIME_W-1:0] tie0_time [0:NPORTS-1];
     wire signed [`GPTT_TIME_W-1:0] tie0_stime [0:NPORTS-1];
+    // B 的 BMCA 角色/GM 状态 (验证 Announce 周期发送 + BMCA 收敛, 先声明避免隐式标量)
+    wire [1:0]  u_b_port_role [0:NPORTS-1];
+    wire        u_b_is_gm     [0:NPORTS-1];
     genvar gi;
     generate
         for (gi = 0; gi < NPORTS; gi = gi + 1) begin : GEN_TIE
@@ -118,9 +121,6 @@ module tb_gptp_cascade;
     // 即可验证透明钟 CF 跨级链式累积.
     wire [63:0] obs_b1_cf;
     wire        obs_b1_fu;
-    // B 的 BMCA 角色/GM 状态 (验证 Announce 周期发送 + BMCA 收敛)
-    wire [1:0]  u_b_port_role [0:NPORTS-1];
-    wire        u_b_is_gm     [0:NPORTS-1];
     gptp_frame_parser #(.PORT_ID(4'd1)) u_obs_b1 (
         .i_clk      (clk),
         .i_rst      (i_rst),
@@ -224,7 +224,7 @@ module tb_gptp_cascade;
         i_rst = 1'b0;
         repeat (10) @(posedge clk);
 
-        $display("[TB] cascade: A(owner=0) 主动发 Sync+FU -> 线缆 -> B(端口1) 收包");
+        $display("[TB] cascade: A(owner=0) sends Sync+FU -> cable -> B(port1) rx");
 
         // 跑足够长时间, 让 A 周期发 Sync/FU, 经线缆到 B, B 解析并触发 servo
         // 观测点: B 端口1 (非 owner) 透传 A 的 FU 时, 其 TX 流中 FU 的 cf
@@ -254,41 +254,41 @@ module tb_gptp_cascade;
                 @(posedge clk);
             end
             if (!seen_a_sync) begin
-                $display("[FAIL] cascade: A owner 端口未发出 Sync 帧");
+                $display("[FAIL] cascade: A owner did not send Sync");
                 tb_pass = 1'b0;
             end
             if (!seen_b_rx) begin
-                $display("[FAIL] cascade: B 端口1 未收到来自 A 的帧 (线缆不通)");
+                $display("[FAIL] cascade: B port1 got no frame from A (link down)");
                 tb_pass = 1'b0;
             end
             if (!got_fu_cf) begin
-                $display("[FAIL] cascade: B 端口1 透传流未解析出 Follow_Up (CF 累积不可验证)");
+                $display("[FAIL] cascade: B port1 passthrough has no Follow_Up (CF n/a)");
                 tb_pass = 1'b0;
             end else if (first_fu_cf == 64'd0) begin
-                $display("[FAIL] cascade: B 透传 FU 的 cf=0, 透明钟未叠加 residence (链式累积失败)");
+                $display("[FAIL] cascade: B FU cf=0, TC did not add residence (chain fail)");
                 $display("        cf=%0h", first_fu_cf);
                 tb_pass = 1'b0;
             end else begin
-                $display("[OK] cascade: B 透传 FU 的 cf=%0h (非零, 透明钟 residence 已叠加 -> 链式累积正确)", first_fu_cf);
+                $display("[OK] cascade: B FU cf=%0h (non-zero, TC added residence -> chain OK)", first_fu_cf);
             end
 
             // BMCA 收敛检查: B 端口1 收到 A(GM, clock_id=0) 的 Announce,
             // 应判定 Slave (role=1) 且 is_gm=0 (A 的 cid 更优)
             if (u_b_is_gm[1] !== 1'b0) begin
-                $display("[FAIL] cascade: B 端口1 is_gm=%b, 期望 0 (A 的 Announce 更优, B 应为 Slave)", u_b_is_gm[1]);
+                $display("[FAIL] cascade: B port1 is_gm=%b, expected 0 (A better, B=Slave)", u_b_is_gm[1]);
                 tb_pass = 1'b0;
             end else if (u_b_port_role[1] !== 2'd1) begin
-                $display("[FAIL] cascade: B 端口1 role=%0d, 期望 SLAVE(1) (BMCA 未收敛)", u_b_port_role[1]);
+                $display("[FAIL] cascade: B port1 role=%0d, expected SLAVE(1) (BMCA n/a)", u_b_port_role[1]);
                 tb_pass = 1'b0;
             end else begin
-                $display("[OK] cascade: B 端口1 BMCA 收敛为 Slave (role=1, is_gm=0), Announce 链路打通");
+                $display("[OK] cascade: B port1 BMCA->Slave (role=1,is_gm=0), announce OK");
             end
         end
 
         if (tb_pass)
-            $display("[PASS] cascade: GM(A) 主动出帧经线缆到达 Slave(B), TC 链式累积 CF 正确, BMCA 收敛");
+            $display("[PASS] cascade: GM(A) frame via cable to Slave(B), TC chain CF OK, BMCA converged");
         else
-            $display("[FAIL] cascade: 级联链路异常");
+            $display("[FAIL] cascade: cascade chain abnormal");
 
         $finish;
     end

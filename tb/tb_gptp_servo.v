@@ -140,11 +140,11 @@ module tb_gptp_servo;
         #50;
         if (tb_pass) begin
             $display("========================================");
-            $display("  [PASS] gptp_servo 全部检查项通过");
+            $display("  [PASS] gptp_servo ALL CHECKS PASSED");
             $display("========================================");
         end else begin
             $display("========================================");
-            $display("  [FAIL] gptp_servo 存在失败项");
+            $display("  [FAIL] gptp_servo SOME CHECKS FAILED");
             $display("========================================");
         end
         $finish;

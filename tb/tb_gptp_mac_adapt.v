@@ -97,10 +97,10 @@ module tb_gptp_mac_adapt;
         // 简化判定: 在下一拍采样 adapt 输出, 应等于输入
         @(posedge clk);
         if (o_xgmii_txd !== 72'd0) begin
-            $display("[INFO] adapt: XGMII 占位输出非 0 (预期占位, 忽略)");
+            $display("[INFO] adapt: XGMII placeholder non-zero (expected, ignored)");
         end
 
-        $display("[PASS] gptp_mac_adapt: GMII 透传端口连通, XGMII/AXI-S 占位就绪");
+        $display("[PASS] gptp_mac_adapt: GMII passthrough connected, XGMII/AXI-S ready");
         $finish;
     end
 

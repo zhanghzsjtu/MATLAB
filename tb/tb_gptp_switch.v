@@ -237,16 +237,16 @@ module tb_gptp_switch;
                 end
             end
             if (!tx_sop_seen) begin
-                $display("[FAIL] Switch TODO①: owner 端口未主动产生 o_tx_sop 出帧脉冲");
+                $display("[FAIL] Switch TODO①: owner produced no o_tx_sop pulse");
                 tb_pass = 1'b0;
             end else if (!seen_sync) begin
-                $display("[FAIL] Switch TODO①: owner 端口发出的帧未识别为 Sync(msgType=0)");
+                $display("[FAIL] Switch TODO①: owner frame not Sync(msgType=0)");
                 tb_pass = 1'b0;
             end else if (!seen_fu) begin
-                $display("[FAIL] Switch TODO①: owner 端口未发出 Follow_Up(msgType=8)");
+                $display("[FAIL] Switch TODO①: owner produced no Follow_Up(msgType=8)");
                 tb_pass = 1'b0;
             end else begin
-                $display("  [OK] Switch TODO①: owner 端口主动生成 Sync+Follow_Up 出帧 (真实 TX 转发闭环)");            end
+                $display("  [OK] Switch TODO①: owner generates Sync+Follow_Up (real TX loop)");            end
         end
 
         // ---- 阶段2.6: 待办② servo 仲裁验证 ----
@@ -262,7 +262,7 @@ module tb_gptp_switch;
             owner_ok = 1'b0; nonowner_blocked = 1'b1; owner_passed = 1'b0;
 
             if (ro_phc_owner == 0) owner_ok = 1'b1;
-            else $display("[WARN] Switch TODO②: o_phc_owner=%0d 期望 0(GM)", ro_phc_owner);
+            else $display("[WARN] Switch TODO②: o_phc_owner=%0d expected 0(GM)", ro_phc_owner);
 
             // 非 owner 端口1 触发 servo 写
             i_port_sync_rx[1] = 1;
@@ -285,37 +285,37 @@ module tb_gptp_switch;
             end
 
             if (!owner_ok) begin
-                $display("[FAIL] Switch TODO②: o_phc_owner 未锁定 GM 端口0"); tb_pass = 1'b0;
+                $display("[FAIL] Switch TODO②: o_phc_owner not locked to GM port0"); tb_pass = 1'b0;
             end
             if (!nonowner_blocked) begin
-                $display("[FAIL] Switch TODO②: 非 owner 端口 servo 写透传到了 PHC (仲裁失效)");
+                $display("[FAIL] Switch TODO②: non-owner servo write leaked to PHC (arb fail)");
                 tb_pass = 1'b0;
             end
             if (!owner_passed) begin
-                $display("[FAIL] Switch TODO②: owner 端口 servo 写未透传到 PHC");
+                $display("[FAIL] Switch TODO②: owner servo write not passed to PHC");
                 tb_pass = 1'b0;
             end
             if (owner_ok && nonowner_blocked && owner_passed)
-                $display("  [OK] Switch TODO②: servo 仲裁正确 (仅 owner 写 PHC, 非 owner 屏蔽)");
+                $display("  [OK] Switch TODO②: servo arbitration OK (owner only writes PHC)");
         end
 
         // ---- 阶段3: 打印最终同步效果 ----
         $display("========================================");
-        $display("  多端口 gPTP 集成仿真 — 最终同步效果");
+        $display("  Multi-port gPTP integration sim - final sync result");
         $display("========================================");
-        $display("GM 时间基准 ro_gm_time_ns = %0d ns (frac=%0d/2^32)",
+        $display("GM time base ro_gm_time_ns = %0d ns (frac=%0d/2^32)",
                  ro_gm_time_ns, ro_gm_time_frac);
         for (i = 0; i < NPORTS; i = i + 1) begin
-            $display("  端口%-1d: role=%0d peer_delay=%0d ns servo_locked=%0b",
+            $display("  Port%-1d: role=%0d peer_delay=%0d ns servo_locked=%0b",
                      i, ro_port_role[i], ro_peer_delay[i], ro_servo_locked[i]);
         end
         $display("----------------------------------------");
-        $display("  同步残差 (各端口相对 GM 的链路不对称, gPTP 测得值):");
-        $display("    端口0: 实测 %0d ns  (注入链路 ~10ns)", ro_peer_delay[0]);
-        $display("    端口1: 实测 %0d ns  (注入链路 ~25ns)", ro_peer_delay[1]);
-        $display("    端口2: 实测 %0d ns  (注入链路 ~40ns)", ro_peer_delay[2]);
-        $display("  -> 各端口独立测得不同链路延迟, servo 将据此把本地时钟");
-        $display("     对齐到 GM, 最终同步精度 ~ 残差 + 时钟漂移 (本模型未计漂移)");
+        $display("  Sync residual (per-port asymmetry vs GM, measured):");
+        $display("    Port0: measured %0d ns (injected ~10ns)", ro_peer_delay[0]);
+        $display("    Port1: measured %0d ns (injected ~25ns)", ro_peer_delay[1]);
+        $display("    Port2: measured %0d ns (injected ~40ns)", ro_peer_delay[2]);
+        $display("  -> each port measures its own link delay; servo will align local clock");
+        $display("     to GM; final sync accuracy ~ residual + drift (drift not modeled)");
         $display("========================================");
 
         // ---- 自检: 明确 PASS/FAIL ----
@@ -342,7 +342,7 @@ module tb_gptp_switch;
             end
             // 单调性: 各端口独立测出不同链路延迟 (长链路 > 短链路)
             if (!(ro_peer_delay[2] > ro_peer_delay[1] && ro_peer_delay[1] > ro_peer_delay[0])) begin
-                $display("[FAIL] Switch: peer_delay 未体现链路差异 (monotonic)");
+                $display("[FAIL] Switch: peer_delay not monotonic per port");
                 tb_pass = 1'b0;
             end
 
@@ -354,10 +354,10 @@ module tb_gptp_switch;
             end
 
             if (tb_pass) begin
-                $display("  [PASS] gptp_switch 集成验证通过 (3端口/共享PHC/独立Pdelay)");
+                $display("  [PASS] gptp_switch integration PASS (3 ports/shared PHC/indep Pdelay)");
                 $display("========================================");
             end else begin
-                $display("  [FAIL] gptp_switch 存在失败项");
+                $display("  [FAIL] gptp_switch SOME CHECKS FAILED");
                 $display("========================================");
             end
         end

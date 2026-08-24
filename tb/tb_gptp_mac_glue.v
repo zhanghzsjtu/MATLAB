@@ -192,11 +192,11 @@ module tb_gptp_mac_glue;
 
         if (tb_pass) begin
             $display("========================================");
-            $display("  [PASS] gptp_mac_glue 全部检查项通过");
+            $display("  [PASS] gptp_mac_glue ALL CHECKS PASSED");
             $display("========================================");
         end else begin
             $display("========================================");
-            $display("  [FAIL] gptp_mac_glue 存在失败项");
+            $display("  [FAIL] gptp_mac_glue SOME CHECKS FAILED");
             $display("========================================");
         end
         $finish;

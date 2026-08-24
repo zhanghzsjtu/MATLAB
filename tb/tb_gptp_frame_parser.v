@@ -178,7 +178,7 @@ module tb_gptp_frame_parser;
             $display("[FAIL] non-PTP frame produced pulses"); tb_pass=1'b0;
         end
 
-        if (tb_pass) $display("[PASS] gptp_frame_parser 提取正确");
+        if (tb_pass) $display("[PASS] gptp_frame_parser field extraction OK");
         else         $display("[FAIL] gptp_frame_parser");
         $finish;
     end

@@ -50,12 +50,12 @@ wire [31:0]             w_frac_nxt;      // 分数次态
 // ----- assign -----
 assign o_time_ns   = ro_time_ns;
 assign o_time_frac = ro_time_frac;
-assign w_tick_inc  = `GPTT_TIME_W'(TICK_NS_I);
+assign w_tick_inc  = TICK_NS_I;   // 基础增量 (整型常量自动扩展为 64 位)
 assign w_frac_nxt  = r_frac + r_freq_corr;
 // 纳秒次态 (含进位/借位检测): 基础增量 + 频偏导致的 +/-1ns 修正
 assign w_ns_nxt = (r_freq_corr[31]) ?
-                   ((w_frac_nxt > r_frac) ? (r_ns + `GPTT_TIME_W'(TICK_NS_I - 1)) : (r_ns + w_tick_inc)) :
-                   ((w_frac_nxt < r_frac) ? (r_ns + `GPTT_TIME_W'(TICK_NS_I + 1)) : (r_ns + w_tick_inc));
+                   ((w_frac_nxt > r_frac) ? (r_ns + (TICK_NS_I - 1)) : (r_ns + w_tick_inc)) :
+                   ((w_frac_nxt < r_frac) ? (r_ns + (TICK_NS_I + 1)) : (r_ns + w_tick_inc));
 
 // ----- FSM -----
 // (本模块无状态机)

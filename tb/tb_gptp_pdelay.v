@@ -172,11 +172,11 @@ module tb_gptp_pdelay;
 
         if (tb_pass) begin
             $display("========================================");
-            $display("  [PASS] gptp_pdelay 全部检查项通过");
+            $display("  [PASS] gptp_pdelay ALL CHECKS PASSED");
             $display("========================================");
         end else begin
             $display("========================================");
-            $display("  [FAIL] gptp_pdelay 存在失败项");
+            $display("  [FAIL] gptp_pdelay SOME CHECKS FAILED");
             $display("========================================");
         end
         $finish;

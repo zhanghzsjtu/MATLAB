@@ -44,6 +44,9 @@ localparam OFF_ANN_P1  = 8'd33;
 localparam OFF_ANN_CID = 8'd34;
 localparam OFF_ANN_P2  = 8'd42;
 localparam OFF_ANN_SR  = 8'd43;
+// FSM 状态常量 (独热码)
+parameter P_ST_IDLE = 2'b01;   // 等待下一发送周期
+parameter P_ST_SEND = 2'b10;   // 发送 Sync / Follow_Up / Announce
 
 // ----- reg -----
 reg [7:0]              r_byte_cnt;     // 当前帧内字节计数 (0..LEN-1)
@@ -65,10 +68,6 @@ assign w_is_idle = (state_c == P_ST_IDLE);
 // 启动: IDLE 且使能且计时到 -> 进入发送 (组合基于旧 state_c, 进入拍即输出 byte0)
 assign w_start   = w_is_idle && i_enable && (r_tick >= i_period);
 assign w_byte_at_orig = (r_byte_cnt >= OFF_ORIG_LO) && (r_byte_cnt <= OFF_ORIG_HI);
-
-// FSM 状态常量 (独热码)
-parameter P_ST_IDLE = 2'b01;   // 等待下一发送周期
-parameter P_ST_SEND = 2'b10;   // 发送 Sync / Follow_Up / Announce
 
 // 状态跳转条件 (独立 wire)
 wire p_st_idle2p_st_send_start = w_start;

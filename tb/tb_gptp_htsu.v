@@ -129,11 +129,11 @@ module tb_gptp_htsu;
 
         if (tb_pass) begin
             $display("========================================");
-            $display("  [PASS] gptp_htsu 全部检查项通过");
+            $display("  [PASS] gptp_htsu ALL CHECKS PASSED");
             $display("========================================");
         end else begin
             $display("========================================");
-            $display("  [FAIL] gptp_htsu 存在失败项");
+            $display("  [FAIL] gptp_htsu SOME CHECKS FAILED");
             $display("========================================");
         end
         $finish;
