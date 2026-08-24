@@ -1,110 +1,69 @@
-# TSN 802.1AS gPTP 时间同步 RTL 工程
+# MATLAB
 
-本项目是**真正可用的帧驱动 gPTP（IEEE 802.1AS）时间同步原型**，基于国防科大 OpenTSN 的 RX_PROC 思路重写，覆盖从 MAC 字节流到伺服校正的完整链路。不再是“时间戳由测试台注入”的演示，而是由真实 PTP 报文驱动闭环。
+复现代码仓库。
 
-## 1. 工程定位
+## ch3 - 脉内频率编码雷达
 
-- **真实可用**：以 GMII 风格 8-bit MAC 字节流（`i_rx_data/i_rx_vld/i_rx_sop/i_rx_eop`）为输入，解析真实 PTP-over-Ethernet 帧（EtherType `0x88F7`），提取字段并驱动伺服校正。
-- **纯 FPGA**：本工程是普通 FPGA 功能模型（无 GPU/显控/仿真底座层），按 Verilog 编码铁律实现。
-- **原型级**：简化 MAC 接口、时间戳在 HTSU 打标、保留 PHC/BMCA/Servo/TC 完整算法骨架，可作为后续对接真实 MAC IP（如 10G BASE-R）的底座。
+《捷变雷达抗干扰与信号处理技术》第 3 章 MATLAB 复现: 脉内频率编码信号数学建模与时域抗间歇采样转发干扰 (ISRJ-DF / ISRJ-RF)。
 
-## 2. 帧驱动闭环数据流
+- 运行: `cd ch3` 后执行 `run_ch3` (100 次蒙特卡罗约 8 分钟)
+- 详见 ch3/README.md
 
+## ch5 - 雷达干扰信号识别
+
+《捷变雷达抗干扰与信号处理技术》第 5 章 MATLAB 复现: 九类干扰信号数学建模与识别。包含 LFM 雷达信号 + 全脉冲转发、全脉冲密集转发、间歇采样转发、部分脉冲密集转发、灵巧噪声、噪声调频、宽带压制、扫频、梳状谱共九类干扰；实现两类识别方法——基于 7 维时频特征的传统决策树 (CART) 与基于 STFT 三通道时频图的 ECNN 深度网络。
+
+- 运行: `cd ch5_jamming_identification` 后执行 `run_all` (一键生成全部 13 张图, 约 4 分钟)
+- 决策树 9 类总体正确率 83.8%; ECNN 在 2%~8% 小样本下 OA 47.1%~58.8%
+- 详见 ch5_jamming_identification/README.md
+
+## STAP - 空时二维自适应处理
+
+相控阵雷达第 23 篇《空时二维自适应处理（STAP）》完整 MATLAB 仿真与 RTL 验证: 4 子阵回波 → 脉压 → 多普勒 FFT → SMI 自适应权 → 空时滤波 → 定点化，解决 MTI 对慢速目标结构性失效问题（目标与杂波多普勒重叠、空间分离时靠空间零陷抑制旁瓣杂波）。
+
+- 黄金仿真: `cd STAP/matlab` 后执行 `stap_ref`（重新生成验证数据）
+- 数据自检: `cd STAP` 后执行 `python tools/stap_rtl_compare.py`
+- RTL 验证: `cd STAP/rtl` 后执行 `bash run_sim.sh`（需 Vivado xsim）
+- 验证结论: 杂波抑制 64.0 dB、目标/杂波比 34.7 dB、RTL 与黄金逐点 ±1 LSB 内 100%
+- 详见 STAP/README.md
+
+## mgs_qr_decomposition - MGS-QR 分解与增量更新
+
+基于修正 Gram-Schmidt（MGS）的 QR 分解: 面向原子支撑集（OMP 等匹配追踪算法）的 QR 分解与增量更新。包含 MATLAB 参考实现（gs_qr / gs_qr_update / 完整测试）与 Q1.15 定点的 Verilog 三段式状态机实现（8 态独热，30 拍 MSB-first 恢复除法）。iverilog 12.0 与 Vivado 2022.1 xsim 双工具链验证，Q(32 项) 与 R(10 项) 全部逐位一致（ALL MATCH PASS）。
+
+- MATLAB 测试: `cd mgs_qr_decomposition` 后执行 `run test_gs_qr.m`（R2025b 实测）
+- Verilog 仿真: `cd mgs_qr_decomposition/rtl` 后执行 `iverilog -g2012 -o qr_sim.vvp qr_decompose_mgs.v tb_qr_decompose_mgs.v && vvp qr_sim.vvp`
+- Vivado xsim: 将 `rtl/rtl_vec/` 下三个 hex 复制到 xsim 工作目录 `rtl_vec/` 后 `run all`
+- 详见 mgs_qr_decomposition/README.md
+
+## dtnet-rml2016-pytorch - DTNet 调制识别 PyTorch 复现
+
+基于 PyTorch 的 DTNet（原论文记作 HSE）在 RML2016.10b 数据集上的调制识别复现: 双流嵌入 + SFE 多尺度特征扩展 + Transformer 长程建模 + split-MLP 轻量分类头，10 类调制（BPSK/QPSK/8PSK/QAM16/QAM64/PAM4/WBFM/CPFSK/GFSK/AM-DSB）。训练管线采用 AMP 混合精度、fused Adam、DataLoader 并行与 cuDNN benchmark 加速，20 epoch 约 14 分钟（RTX 4060 Laptop）。含训练曲线、per-SNR 准确率、时域波形、混淆矩阵四类由代码生成的中文标注图。
+
+- 运行: `cd dtnet-rml2016-pytorch` 后执行 `pip install -r requirements.txt`，再 `python train.py dataset2016b.h5`
+- 测试集评估: `python eval.py dataset2016b.h5 test`；可视化: `python plot_train_curve.py`、`python fig_snr.py`、`python fig_signal.py`
+- 复现精度: test 整体 62.76%，per-SNR 宏平均 62.87%，最优单 SNR 92.90% @ +12 dB
+- 详见 dtnet-rml2016-pytorch/README.md 与 DTNet_RML2016_CSDN博客.md
+
+## tsn_8021as_gptp - 802.1AS / gPTP 时间同步 RTL
+
+IEEE 802.1AS 时间同步协议的可运行 RTL 原型：基于帧驱动的真实 gPTP 闭环，从 MAC 字节流到伺服校正全覆盖，弥补当前仓库在"通信/时间同步"方向的空白（雷达信号链时间对齐底座）。
+
+- **定位**：以 GMII 风格 8-bit MAC 字节流为输入，解析真实 PTP-over-Ethernet 帧（EtherType `0x88F7`），提取字段并驱动伺服校正；纯 FPGA 功能模型，可作为对接真实 MAC IP（如 10G BASE-R）的底座。
+- **模块**（14 个，位于 `tsn_8021as_gptp/src/um/`）：PHC、HTSU 时间戳、透明钟 TC、P2P 延迟测量、MAC 胶接、帧解析、跨时钟域 FIFO、TX 出帧生成、BMCA、PI 伺服、单端口集成 `gptp_top`、多端口交换机 `gptp_switch`、MAC 适配层 `gptp_mac_adapt`。
+- **验证**：12 个测试台（`tsn_8021as_gptp/tb/`）全部通过——iverilog 12/12 全绿，Vivado 2018.3 xsim 引擎（`xelab -a` standalone）实测 12/12 PASS。
+
+### 快速开始
+
+```bash
+cd tsn_8021as_gptp
+bash sim/run_sim.sh            # iverilog 分层回归 (12/12 PASS)
+# 或 Vivado 2018.3 一键回归:
+tools/run_xsim.bat all        # 生成 axsim.exe 自动跑到 $finish, 日志 vivado_proj/run_auto.log
 ```
-MAC RX 字节流 (i_rx_clk 异步域)
-   │ (DA6 + SA6 + ET0x88F7 + PTP header)
-   ▼
-gptp_rx_fifo        ← 异步 FIFO 跨时钟域 (MAC 接收时钟 -> 系统时钟)
-   ▼ (系统时钟域字节流)
-gptp_frame_parser    ← 从字节流提取 msgType/seqId/correctionField/originTimestamp
-   │  o_sync_vld / o_follow_up_vld / o_cf_ns / o_origin_ts_ns
-   ▼
-gptp_top (per-port)
-   │  ├─ HTSU   : 收/发时间戳 t2/t3 + 驻留时间
-   │  ├─ TC     : 透明钟 one-step correctionField 改写
-   │  └─ Pdelay : P2P 链路延迟测量
-   ▼
-gptp_servo          ← 用 t1(origin) / t2(local) / cf 计算相位误差, 输出 adjtime/adjfine
-   │
-   ▼ (经仲裁: 仅 owner 写)
-gptp_phc            ← 共享 PHC: 仅 owner(GM) 端口 servo 可写, 其余屏蔽
-   │
-   ▼
-gptp_tx_gen         ← owner(GM) 端口主动生成 Sync + Follow_Up 出帧 (真实 TX 转发)
-   │  o_tx_data/vld/sop/eop
-   ▼
-MAC TX 字节流 (owner 主动发; 非 owner 由 glue 透传上游 Sync)
-```
-o_gm_time_ns / o_gm_time_frac   ← 全网统一时间基准
-```
 
-## 3. PTP 报文偏移布局（DA 起算）
+详见 `tsn_8021as_gptp/README.md`、`tsn_8021as_gptp/doc/`（架构图、波形、CSDN 工程实践博客）。
 
-| 字段 | 偏移 | 字节 | 说明 |
-|------|------|------|------|
-| DA | 0..5 | 6 | 目的 MAC |
-| SA | 6..11 | 6 | 源 MAC |
-| EtherType | 12..13 | 2 | `0x88F7` |
-| msgType | 14 | 1 | PTP 头 byte0 低 4 位 |
-| correctionField | 22..29 | 8 | 大端, 单位 ns<<CF_FRAC_W |
-| sequenceId |  40..41 | 2 | 大端 |
-| originTimestamp.ns | 48..51 | 4 | 仅 Follow_Up 携带, 大端 |
+## 许可 License
 
-> 注：`gptp_frame_parser` 内部 `r_byte_cnt` 在 SOP 当拍清零不计入，故采样偏移整体 −1（OFF_ET=11 / OFF_MSG=13 / OFF_SEQ=39 / OFF_CF_LO=21 / OFF_ORIG_LO=47）。
-
-## 4. 模块清单（`src/um/`）
-
-| 文件 | 职责 |
-|------|------|
-| gptp_defines.v | 消息类型、位宽等全局参数 |
-| gptp_phc.v | 相位累积时钟 (PHC) |
-| gptp_htsu.v | 时间戳单元 (t2/t3 打标 + 驻留时间) |
-| gptp_tc.v | 透明钟 (one-step CF 改写) |
-| gptp_pdelay.v | P2P 链路延迟测量状态机 |
-| gptp_mac_glue.v | MAC 帧识别 / msgType / CF 改写 |
-| gptp_frame_parser.v | 字节流 → PTP 字段解析 |
-| gptp_rx_fifo.v | **新增** 异步 FIFO 跨时钟域 (MAC RX → 系统时钟) |
-| gptp_tx_gen.v | **新增** owner 端口 Sync/Follow_Up/Announce 出帧生成 |
-| gptp_bmca.v | 最佳主时钟选举 |
-| gptp_servo.v | PI 伺服环 (adjtime/adjfine) |
-| gptp_top.v | 单端口核心集成 |
-| gptp_switch.v | 多端口交换机 (共享 PHC + 仲裁 + BMCA + CDC + TX 转发) |
-| gptp_mac_adapt.v | **新增** MAC IP 适配层 (GMII 透传 / XGMII / AXI-S 占位) |
-
-## 5. 验证状态（12/12 PASS）
-
-运行 `bash sim/run_sim.sh` 完成分层回归：
-
-| 层级 | 测试台 | 结论 |
-|------|--------|------|
-| 基础 | tb_gptp_phc | PHC 计数/调频/调相/初始化 |
-| 基础 | tb_gptp_htsu | t2/t3 打标 + 驻留时间 (residence 实时输出, 非 event 帧不锁 t2) |
-| 基础 | tb_gptp_tc | one-step correctionField 改写 |
-| 基础 | tb_gptp_pdelay | P2P 双向延迟测量 |
-| 基础 | tb_gptp_mac_glue | PTP 帧识别 / msgType / CF 改写 (Sync/Pdelay_Req/Announce 非 event, FU 计入 event) |
-| 基础 | tb_gptp_frame_parser | SYNC/FU/PDELAY_REQ/ANNOUNCE 字段提取 + 非 PTP 抑制 |
-| 控制面 | tb_gptp_bmca | 最佳主时钟选举 |
-| 执行面 | tb_gptp_servo | PI 伺服环 |
-| 集成 | tb_gptp_top | 单端口端到端联动 (residence=40ns, cf_out=2621440) |
-| 系统 | tb_gptp_switch | 多端口 / 共享 PHC / 仲裁 / **真实 TX 转发** / **FIFO CDC** |
-| 系统 | tb_gptp_cascade | **两级交换机级联**: GM→线缆→Slave, TC 链式累积 CF, BMCA 收敛为 Slave |
-| 适配 | tb_gptp_mac_adapt | MAC 适配层 GMII 透传端口连通, XGMII/AXI-S 占位就绪 |
-
-> cascade 验证项：`B 透传 FU 的 cf=e008000000`（非零，透明钟 residence 已叠加 → 链式累积正确）；`B 端口1 BMCA 收敛为 Slave (role=1, is_gm=0)`，Announce 链路打通。
-
-## 6. 已实现功能闭环
-
-1. **帧驱动解析**：`gptp_frame_parser` 从 GMII 字节流提取 PTP 字段（origin 拼装修正到低 32 位）。
-2. **跨时钟域 FIFO**：`gptp_rx_fifo` 异步 FIFO（格雷码指针判空满），每端口 MAC RX 经独立 `i_rx_clk` 跨到系统域，写入深度 64，支持异步 MAC（写时钟必须 wire 直连 clk，不可经 reg 延迟一拍）。
-3. **真实 TX 转发**：`gptp_tx_gen` 由 owner(GM) 端口主动周期生成 Sync + Follow_Up + Announce 出帧（originTimestamp=t1 取自 PHC）；非 owner 端口经 `gptp_mac_glue` 透传上游 Sync。收包到发包完全自洽。
-4. **servo 仲裁**：仅 owner 端口 servo 经 `w_phc_adjtime_wr = w_adjtime_wr[r_phc_owner]` 写共享 PHC，非 owner 屏蔽。
-5. **级联端到端同步**：两级交换机（GM A → 线缆 → Slave B）级联验证。B 的透明钟把本机 residence 叠到 correctionField 并转发，实现 CF 跨级链式累积；B 通过 A 的 Announce 收敛为 Slave（role=1, is_gm=0）。
-6. **Announce 周期发送 + BMCA 收敛**：`gptp_tx_gen` 在 Sync→FU 周期后补充 Announce 相位（msgType=11，携带 priority1/clock_id/priority2/steps_removed 优先级向量）；`gptp_bmca` 基于 Announce 向量选举 Master/Slave/Passive，输出 `o_is_gm`。
-7. **MAC IP 适配层**：`gptp_mac_adapt` 提供 GMII 字节流双向透传（直接 assign），并预留 XGMII（72-bit）/ AXI-S（TVALID/TREADY/TDATA/TLAST）占位接口（当前恒 0），参数 `MAC_IF`（`"GMII"`/`"XGMII"`/`"AXIS"`）+ `NPORTS`，便于对接 10G BASE-R 等真实 MAC IP。
-
-## 7. 已知待办 / 后续
-
-- 真实 MAC IP（如 10G BASE-R PCS/PMA）对接时，将 `MAC_IF` 切到 `"XGMII"`/`"AXIS"` 并实现对应占位接口；异步 FIFO 的 `i_rx_clk` 应接真实 MAC 接收时钟（当前仿真同频）。
-- two-step TC 回读原 CF 路径（`TC_MODE=1`）仅在 `gptp_tc` 内预留，未建独立 testbench；如需可补 `tb_gptp_tc` 的 two-step 分支。
-- 多跳（>2 级）级联与全网 BMCA 收敛的规模化验证可作为后续压力项。
-
+本仓库代码采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
