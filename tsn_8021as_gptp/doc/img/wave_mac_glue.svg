@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 420" width="1100" height="420" font-family="Consolas,Menlo,monospace" font-size="13">
+<rect width="1100" height="420" fill="#fbfcfe"/>
+<text x="150" y="26" font-size="16" font-weight="bold" fill="#1f2d3d">MAC 胶合: 帧流识别 -> CF 字节级改写 (帧偏移22~29)</text>
+<text x="1070" y="26" text-anchor="end" font-size="11" fill="#8a94a6">仿真时间 0..748000 tick</text>
+<line x1="150.0" y1="40" x2="150.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="150.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">0</text>
+<line x1="242.0" y1="40" x2="242.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="242.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">74800</text>
+<line x1="334.0" y1="40" x2="334.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="334.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">149600</text>
+<line x1="426.0" y1="40" x2="426.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="426.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">224400</text>
+<line x1="518.0" y1="40" x2="518.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="518.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">299200</text>
+<line x1="610.0" y1="40" x2="610.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="610.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">374000</text>
+<line x1="702.0" y1="40" x2="702.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="702.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">448800</text>
+<line x1="794.0" y1="40" x2="794.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="794.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">523599</text>
+<line x1="886.0" y1="40" x2="886.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="886.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">598400</text>
+<line x1="978.0" y1="40" x2="978.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="978.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">673200</text>
+<line x1="1070.0" y1="40" x2="1070.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="1070.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">748000</text>
+<line x1="150" y1="81.0" x2="1070" y2="81.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="85.0" font-size="12" fill="#33414f" font-weight="bold">rx_sop</text>
+<rect x="10" y="50" width="6" height="14" fill="#0072BD"/>
+<path d="M150.0 81.0 L150.0 81.0 L174.6 81.0 L174.6 59.0 L184.4 59.0 L184.4 81.0 L371.4 81.0 L371.4 59.0 L381.2 59.0 L381.2 81.0 L568.2 81.0 L568.2 59.0 L578.0 59.0 L578.0 81.0 L765.0 81.0 L765.0 59.0 L774.8 59.0 L774.8 81.0 L981.4 81.0 L981.4 59.0 L991.3 59.0 L991.3 81.0 L1070.0 81.0" fill="none" stroke="#0072BD" stroke-width="1.6"/>
+<line x1="150" y1="167.0" x2="1070" y2="167.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="171.0" font-size="12" fill="#33414f" font-weight="bold">rx_eop</text>
+<rect x="10" y="136" width="6" height="14" fill="#D95319"/>
+<path d="M150.0 167.0 L150.0 167.0 L341.9 167.0 L341.9 145.0 L351.7 145.0 L351.7 167.0 L538.7 167.0 L538.7 145.0 L548.5 145.0 L548.5 167.0 L735.5 167.0 L735.5 145.0 L745.3 145.0 L745.3 167.0 L932.2 167.0 L932.2 145.0 L942.1 145.0 L942.1 167.0 L1040.5 167.0 L1040.5 145.0 L1050.3 145.0 L1050.3 167.0 L1070.0 167.0" fill="none" stroke="#D95319" stroke-width="1.6"/>
+<line x1="150" y1="253.0" x2="1070" y2="253.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="257.0" font-size="12" fill="#33414f" font-weight="bold">rx_vld</text>
+<rect x="10" y="222" width="6" height="14" fill="#2ca02c"/>
+<path d="M150.0 253.0 L150.0 253.0 L174.6 253.0 L174.6 231.0 L351.7 231.0 L351.7 253.0 L371.4 253.0 L371.4 231.0 L548.5 231.0 L548.5 253.0 L568.2 253.0 L568.2 231.0 L745.3 231.0 L745.3 253.0 L765.0 253.0 L765.0 231.0 L942.1 231.0 L942.1 253.0 L981.4 253.0 L981.4 231.0 L1050.3 231.0 L1050.3 253.0 L1070.0 253.0" fill="none" stroke="#2ca02c" stroke-width="1.6"/>
+<line x1="150" y1="339.0" x2="1070" y2="339.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="343.0" font-size="12" fill="#33414f" font-weight="bold">cf_wr</text>
+<rect x="10" y="308" width="6" height="14" fill="#9467bd"/>
+<path d="M150.0 339.0 L150.0 339.0 L981.4 339.0 L981.4 317.0 L991.3 317.0 L991.3 339.0 L1070.0 339.0" fill="none" stroke="#9467bd" stroke-width="1.6"/>
+</svg>

@@ -45,6 +45,25 @@
 - 复现精度: test 整体 62.76%，per-SNR 宏平均 62.87%，最优单 SNR 92.90% @ +12 dB
 - 详见 dtnet-rml2016-pytorch/README.md 与 DTNet_RML2016_CSDN博客.md
 
+## tsn_8021as_gptp - 802.1AS / gPTP 时间同步 RTL
+
+IEEE 802.1AS 时间同步协议的可运行 RTL 原型：基于帧驱动的真实 gPTP 闭环，从 MAC 字节流到伺服校正全覆盖，弥补当前仓库在"通信/时间同步"方向的空白（雷达信号链时间对齐底座）。
+
+- **定位**：以 GMII 风格 8-bit MAC 字节流为输入，解析真实 PTP-over-Ethernet 帧（EtherType `0x88F7`），提取字段并驱动伺服校正；纯 FPGA 功能模型，可作为对接真实 MAC IP（如 10G BASE-R）的底座。
+- **模块**（14 个，位于 `tsn_8021as_gptp/src/um/`）：PHC、HTSU 时间戳、透明钟 TC、P2P 延迟测量、MAC 胶接、帧解析、跨时钟域 FIFO、TX 出帧生成、BMCA、PI 伺服、单端口集成 `gptp_top`、多端口交换机 `gptp_switch`、MAC 适配层 `gptp_mac_adapt`。
+- **验证**：12 个测试台（`tsn_8021as_gptp/tb/`）全部通过——iverilog 12/12 全绿，Vivado 2018.3 xsim 引擎（`xelab -a` standalone）实测 12/12 PASS。
+
+### 快速开始
+
+```bash
+cd tsn_8021as_gptp
+bash sim/run_sim.sh            # iverilog 分层回归 (12/12 PASS)
+# 或 Vivado 2018.3 一键回归:
+tools/run_xsim.bat all        # 生成 axsim.exe 自动跑到 $finish, 日志 vivado_proj/run_auto.log
+```
+
+详见 `tsn_8021as_gptp/README.md`、`tsn_8021as_gptp/doc/`（架构图、波形、CSDN 工程实践博客）。
+
 ## 许可 License
 
 本仓库代码采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。

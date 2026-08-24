@@ -1,0 +1,31 @@
+# 仿真编译产物
+sim/*.vvp
+sim/*.vcd
+sim/*.log
+
+# Vivado / xsim 仿真与综合产物 (本地构建残留, 不入库)
+xsim.dir/
+vivado_proj/
+.Xil/
+webtalk*
+xsim*.jou
+xsim*.log
+xelab.log
+xelab.pb
+xvlog.log
+xvlog.pb
+vivado*.jou
+vivado*.log
+*.vvp
+axsim.bat
+
+# Python
+tools/__pycache__/
+__pycache__/
+
+# 压缩包
+*.zip
+
+# 编辑器/OS 临时文件
+*.swp
+.DS_Store

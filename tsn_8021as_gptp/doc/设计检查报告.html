@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSN 802.1AS gPTP 设计检查报告</title>
+<style>
+  :root{
+    --navy:#0b2545; --navy2:#13315c; --gold:#c9a227; --gold2:#e3c25b;
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1c2733; --muted:#5b6b7b;
+    --line:#e3e8ef; --ok:#1f8a4c; --warn:#d98324; --bad:#c0392b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.7;}
+  .hero{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;
+        padding:34px 40px 28px;}
+  .hero h1{margin:0 0 6px;font-size:26px;letter-spacing:.5px;}
+  .hero .sub{color:var(--gold2);font-size:14px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 20px 60px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:22px 26px;margin:18px 0;box-shadow:0 2px 10px rgba(11,37,69,.05);}
+  .card h2{margin:0 0 14px;font-size:19px;color:var(--navy);
+           border-left:4px solid var(--gold);padding-left:12px;}
+  .summary{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0 4px;}
+  .pill{flex:1 1 150px;background:#fff;border:1px solid var(--line);border-radius:10px;
+        padding:14px 16px;text-align:center;}
+  .pill .num{font-size:28px;font-weight:700;}
+  .pill .lab{font-size:12px;color:var(--muted);margin-top:2px;}
+  .num.ok{color:var(--ok);} .num.warn{color:var(--warn);} .num.bad{color:var(--bad);}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px;}
+  th,td{border:1px solid var(--line);padding:9px 11px;vertical-align:top;text-align:left;}
+  th{background:#eef2f7;color:var(--navy);font-weight:600;}
+  tr:nth-child(even) td{background:#fafbfc;}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff;}
+  .t-p0{background:var(--bad);} .t-p1{background:var(--warn);} .t-p2{background:#7a8aa0;}
+  .t-ok{background:var(--ok);} .t-doc{background:#3a6ea5;}
+  code{background:#eef2f7;padding:1px 6px;border-radius:5px;font-family:Consolas,Menlo,monospace;font-size:12.5px;}
+  .verdict{border-left:4px solid var(--gold);background:#fffdf3;padding:14px 18px;border-radius:8px;margin:10px 0;}
+  ul{margin:8px 0 8px 4px;padding-left:20px;}
+  li{margin:5px 0;}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:30px;}
+  a{color:var(--navy2);}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>TSN 802.1AS gPTP 交换机端口时间同步 — 设计检查报告</h1>
+  <div class="sub">OpenTSN 风格 · 单/多端口 gPTP 实现 · 源码 vs 设计文档一致性 + 逻辑缺陷审查</div>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>一、检查结论速览</h2>
+    <div class="summary">
+      <div class="pill"><div class="num ok">9/9</div><div class="lab">testbench 实跑 PASS</div></div>
+      <div class="pill"><div class="num ok">10</div><div class="lab">源码模块 + 9 tb</div></div>
+      <div class="pill"><div class="num bad">1</div><div class="lab">P2 逻辑缺陷（已修）</div></div>
+      <div class="pill"><div class="num warn">3</div><div class="lab">文档/接口偏差</div></div>
+      <div class="pill"><div class="num warn">2</div><div class="lab">集成隐患（TODO）</div></div>
+    </div>
+    <div class="verdict">
+      <b>总体判断：</b>工程结构清晰、分层验证策略正确，仿真交付物（9 个 tb 全 PASS、数值与文档一致）
+      经本人用 Icarus Verilog 12 实跑<b>确认属实</b>。但静态审查发现 1 处<b>确定性逻辑错误</b>
+      （BMCA stepsRemoved 比较恒真，已被仿真盲区掩盖）和若干文档/接口表述偏差，均已修复或标注。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>二、仿真真实性核验（实际编译运行）</h2>
+    <p>文档第 152–168 行声称 "iverilog 13.0, 全部 9 个 tb PASS"。本人于本机安装
+       Icarus Verilog 12.2022.06.11 后实跑 <code>sim/run_sim.sh</code>，结果：</p>
+    <table>
+      <tr><th>testbench</th><th>验证对象</th><th>实跑结果</th><th>关键数值（与文档一致）</th></tr>
+      <tr><td>tb_gptp_phc</td><td>PHC 计数/调频/调相/初始化</td><td><span class="tag t-ok">PASS</span></td><td>free-run 每拍 +8ns</td></tr>
+      <tr><td>tb_gptp_htsu</td><td>进出帧 t2/t3 打标 + residence</td><td><span class="tag t-ok">PASS</span></td><td>residence=100ns</td></tr>
+      <tr><td>tb_gptp_tc</td><td>one-step correctionField 改写</td><td><span class="tag t-ok">PASS</span></td><td>136ns×65536=8912896</td></tr>
+      <tr><td>tb_gptp_pdelay</td><td>P2P 状态机 ((t4-t1)-(t3-t2))/2</td><td><span class="tag t-ok">PASS</span></td><td>peer_delay=6 / 对称=0</td></tr>
+      <tr><td>tb_gptp_mac_glue</td><td>0x88F7 识别 / msgType / CF 改写锁存</td><td><span class="tag t-ok">PASS</span></td><td>Sync/Pdelay/Announce 区分正确</td></tr>
+      <tr><td>tb_gptp_bmca</td><td>优先级向量比较 + 角色选举</td><td><span class="tag t-ok">PASS</span></td><td>Master/Slave/Tie-break</td></tr>
+      <tr><td>tb_gptp_servo</td><td>PI 环 offset→adjtime/adjfine</td><td><span class="tag t-ok">PASS</span></td><td>offset 收敛 → locked</td></tr>
+      <tr><td>tb_gptp_top</td><td>单端口端到端联动</td><td><span class="tag t-ok">PASS</span></td><td>time_ns=704 peer_delay=19 residence=136 cf_out=8912896</td></tr>
+      <tr><td>tb_gptp_switch</td><td>多端口/共享 PHC/独立 Pdelay</td><td><span class="tag t-ok">PASS</span></td><td>端口 20/32/48ns 单调</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:13px;">结论：仿真结果<b>可信</b>，文档未造假。但 "PASS" 不等于 "无缺陷" —— 见下一节。</p>
+  </div>
+
+  <div class="card">
+    <h2>三、缺陷与偏差明细（按优先级）</h2>
+    <table>
+      <tr><th>#</th><th>级别</th><th>位置</th><th>问题</th><th>状态</th></tr>
+
+      <tr>
+        <td>1</td>
+        <td><span class="tag t-p0">P2 逻辑</span></td>
+        <td><code>gptp_bmca.v</code> 原 129 行</td>
+        <td><b>stepsRemoved 比较恒真：</b><code>if (i_rem_steps_removed &lt; i_rem_steps_removed + 1)</code>
+            永远为真，导致 <code>ROLE_PASSIVE</code> 永远不可达、语义错误（本意是比较本/对端 steps）。
+            <b>仿真盲区：</b>现有 tb 只测 "对端优→Slave" 与 "对端差→Master"，两种恰好碰巧正确，未暴露。</td>
+        <td><span class="tag t-ok">已修复</span></td>
+      </tr>
+
+      <tr>
+        <td>2</td>
+        <td><span class="tag t-doc">文档</span></td>
+        <td><code>README.md</code> §2 精度表</td>
+        <td><b>精度夸大：</b>称 "1ns LSB"，实际 125MHz 时钟下整数 ns 为 <b>8ns 步长</b>，
+            sub-ns 仅由 DDS 频偏累加器<b>平均</b>体现（长期频率精度，非每拍 1ns 绝对分辨率）。</td>
+        <td><span class="tag t-ok">已修正</span></td>
+      </tr>
+
+      <tr>
+        <td>3</td>
+        <td><span class="tag t-doc">文档</span></td>
+        <td><code>README.md</code> §3 gptp_top</td>
+        <td><b>接口不符：</b>文档称 top 输出 <code>ro_rx_ts_ns/frac</code>、<code>ro_tx_ts_ns/frac</code>，
+            但 <code>gptp_top.v</code> 实际未向顶层暴露（仅内部 residence 外送）。</td>
+        <td><span class="tag t-ok">已标注</span></td>
+      </tr>
+
+      <tr>
+        <td>4</td>
+        <td><span class="tag t-p1">集成隐患</span></td>
+        <td><code>gptp_switch.v</code> 131–134 行</td>
+        <td><b>TX 边沿复用 RX：</b><code>.i_tx_sof(w_rx_sof[p])</code>、<code>.i_tx_eof(w_rx_eof[p])</code>、
+            <code>.i_pkt_vld(w_is_event[p])</code>。收帧同时被当作发帧，HTSU 的 residence 在 switch 下
+            <b>永远算不出</b>（无独立 TX 流驱动 WAIT→TX）。当前仅 Pdelay 独立工作故 tb 仍 PASS，
+            但 "共享时间基准 + 真实转发时间戳" 未闭环。属文档已声明 TODO 的简化未完成。</td>
+        <td><span class="tag t-p2">待办</span></td>
+      </tr>
+
+      <tr>
+        <td>5</td>
+        <td><span class="tag t-p1">架构隐患</span></td>
+        <td><code>gptp_switch.v</code> 76–87 / 120 行</td>
+        <td><b>多端口 servo 争夺共享 PHC：</b>u_phc 仅接端口 0 的 servo（<code>w_adjfine_wr[0]</code> 等），
+            其余端口 servo 的 adjtime/adjfine 在 <code>gptp_top</code> 内被硬接 <code>1'b0</code> 屏蔽。
+            即多端口各自 servo 会"打架"，只有端口 0 生效；GM 端口选择逻辑缺失（文档未说明）。</td>
+        <td><span class="tag t-p2">待办</span></td>
+      </tr>
+
+      <tr>
+        <td>6</td>
+        <td><span class="tag t-p2">次要</span></td>
+        <td><code>gptp_tc.v</code> 35 / 77 行</td>
+        <td><code>o_cf_rd</code> 在 one-step 模式下随 <code>i_pkt_vld</code> 恒拉高，语义混乱
+            （two-step 才需 rd original CF）；且作为输出端口无任何消费者。</td>
+        <td><span class="tag t-p2">待办</span></td>
+      </tr>
+
+      <tr>
+        <td>7</td>
+        <td><span class="tag t-p2">次要</span></td>
+        <td><code>gptp_mac_glue.v</code> TX 路径</td>
+        <td>TX 直接 <code>o_tx_data &lt;= i_rx_data</code> 回环，CF 字节级改写完全未做
+            （仅置 <code>ro_cf_wr_done</code> 标志）。文档 §6 已声明 TODO，属已知限制。</td>
+        <td><span class="tag t-p2">已知</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>四、修复内容（本次已落地）</h2>
+    <ul>
+      <li><b>BMCA 恒真 bug 修复</b>（<code>gptp_bmca.v</code>）：删除恒真条件，
+          "对端优 → Slave" 语义明确；保留 <code>ROLE_PASSIVE</code> 编码并注释说明待扩展本地
+          stepsRemoved 后启用。重编译复跑 9/9 仍 PASS，行为正确。</li>
+      <li><b>README §2 精度表</b>：将 "1ns LSB" 改为 "8ns 步长 + sub-ns 平均频率分辨率"，
+          并新增精度说明段，明确指出 1ns 绝对分辨率需提频或相位插值（TODO）。</li>
+      <li><b>README §3 gptp_top / gptp_bmca</b>：如实标注 top 未暴露 t2/t3 时间戳、
+          BMCA Passive 修复说明与测试盲区提示。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>五、建议的后续工作（按优先级）</h2>
+    <ul>
+      <li><b>[高]</b> 为 BMCA 补一个能触发 <code>ROLE_PASSIVE</code> 的 tb 用例
+          （需先引入 <code>i_local_steps_removed</code> 输入端口，按 802.1AS 标准比较
+          本/对端 steps 决定 Slave/Passive），消除测试盲区。</li>
+      <li><b>[高]</b> 在 <code>gptp_switch</code> 中引入真实的 TX 转发流（或独立 <code>i_tx_sof/eof</code>
+          驱动），让 HTSU 的 residence 在多端口下真正可算，闭合 "共享时间基准 + 转发时间戳"。</li>
+      <li><b>[中]</b> 设计 GM 端口仲裁：多端口 servo 不能同时写共享 PHC，
+          应由 BMCA 选出的 GM 端口（或固定端口 0）独占 adjtime/adjfine，其余端口 servo 输出 gate 掉。</li>
+      <li><b>[中]</b> 清理 <code>gptp_tc</code> 的 <code>o_cf_rd</code> 语义（one-step 下移除或置 0）。</li>
+      <li><b>[低]</b> <code>gptp_mac_glue</code> 完成 CF 字节级改写（接 FIFO + 字节计数器定位 CF 偏移）。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>六、编码规范符合性</h2>
+    <table>
+      <tr><th>规范项</th><th>要求</th><th>符合情况</th></tr>
+      <tr><td>前缀</td><td>r_/w_/ro_</td><td><span class="tag t-ok">符合</span> 全部寄存器/线网遵循</td></tr>
+      <tr><td>状态常量</td><td>P_ST_</td><td><span class="tag t-ok">符合</span></td></tr>
+      <tr><td>FSM</td><td>三段式（状态寄存/次态组合/时序输出）</td><td><span class="tag t-ok">符合</span> 各 FSM 模块一致</td></tr>
+      <tr><td>复位</td><td>异步复位 'd0</td><td><span class="tag t-ok">符合</span></td></tr>
+      <tr><td>位宽字面量</td><td>数值带位宽（如 32'd0）</td><td><span class="tag t-ok">符合</span></td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:13px;">编码规范执行良好，无风格违规；缺陷集中在算法/集成逻辑层，非风格问题。</p>
+  </div>
+
+  <div class="foot">
+    检查人：WorkBuddy · 检查日期：2026-08-22 · 工具链：Icarus Verilog 12.2022.06.11 (Windows x64)<br>
+    改动文件：gptp_bmca.v（修复）、README.md（3 处修正）。仿真结果已复跑验证 9/9 PASS。
+  </div>
+
+</div>
+</body>
+</html>
