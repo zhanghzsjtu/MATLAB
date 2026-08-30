@@ -71,7 +71,7 @@ De Maio & Orlando 2011（IEEE TSP 59(9)）点目标自适应雷达检测与定�
 - 推导精讲与对比：见 `DeMaio_Orlando_2011/README.md`
 - 复现代码：见 `DeMaio_Orlando_2011/code/`（含 Modified/Classic 检测器、数据生成、对比页）
 - 复现图：见 `DeMaio_Orlando_2011/images/`
-- 说明：本文档已做脱敏处理，不含任何专有雷达系统参数
+
 
 ## 许可 License
 
