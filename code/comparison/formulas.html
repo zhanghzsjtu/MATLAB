@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>De Maio & Orlando 2011 TSP — 公式整理与详细推导</title>
+<script>
+MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --bg:#fafaf7; --panel:#ffffff; --ink:#1f2330; --ink2:#4b5063;
+    --line:#d9dbe0; --accent:#1f4e79; --accent2:#b9452a;
+    --soft:#f0f3f8; --quote:#fff7e6; --ok:#2c7a4b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                    "Microsoft YaHei", "Noto Serif CJK SC", serif;
+       line-height:1.85; font-size:15px}
+  header{background:linear-gradient(135deg,#1f4e79 0%,#3a6ea5 100%);
+         color:#fff; padding:32px 48px; box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  header h1{margin:0 0 6px;font-size:26px;letter-spacing:.5px}
+  header .sub{opacity:.9;font-size:14px}
+  main{max-width:1100px;margin:0 auto;padding:24px 36px 80px}
+  h2{margin:36px 0 14px;padding:10px 14px;background:var(--soft);
+     border-left:5px solid var(--accent); font-size:20px}
+  h3{margin:26px 0 10px; color:var(--accent); font-size:17px}
+  h4{margin:18px 0 8px; color:#333; font-size:15px}
+  p{margin:8px 0}
+  .meta{color:var(--ink2); font-size:13px}
+  .formula{background:#fbfbf7; border:1px solid #e6e3d6; padding:10px 14px;
+           border-radius:4px; margin:10px 0; overflow-x:auto}
+  .formula .eq-no{float:right; color:var(--ink2); font-size:13px}
+  .note{background:var(--quote); border-left:3px solid #d99a2b;
+        padding:10px 14px; margin:14px 0; font-size:14px; border-radius:4px}
+  .toc{position:sticky; top:0; background:rgba(250,250,247,.95);
+       backdrop-filter:saturate(1.2) blur(4px); border-bottom:1px solid var(--line);
+       padding:8px 36px; z-index:10}
+  .toc a{color:var(--accent); text-decoration:none; margin-right:14px; font-size:14px}
+  .toc a:hover{text-decoration:underline}
+  code{background:#eef0f4; padding:1px 6px; border-radius:3px; font-size:13px}
+  .step{counter-increment: step; margin:10px 0; padding-left:14px; position:relative}
+  .step:before{content: counter(step) "."; position:absolute; left:-4px; top:0;
+                color:var(--accent2); font-weight:700}
+  ol.steps{counter-reset: step; list-style:none; padding-left:18px}
+  .eqtag{float:right; color:var(--ink2); font-size:13px; font-style:italic}
+  hr{border:none; border-top:1px dashed var(--line); margin:30px 0}
+  .def{color:var(--accent2)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>De Maio &amp; Orlando 2011 TSP — 公式整理与详细推导</h1>
+  <div class="sub">论文：<i>Adaptive Radar Detection and Localization of a Point-Like Target</i>，IEEE TSP 59(9), 2011
+  &nbsp;·&nbsp; 本文严格按论文 Section II–IV 公式与编号整理，并给出完整推导
+  &nbsp;·&nbsp; 配套文档：<a href="index.html" style="color:#fff;text-decoration:underline">原始图 vs 复现图 对比</a></div>
+</header>
+
+<div class="toc" style="padding:8px 36px">
+  <a href="#s1">1 符号与模型</a>
+  <a href="#s2">2 主数据与协方差</a>
+  <a href="#s3">3 导向矢量</a>
+  <a href="#s4">4 假设检验</a>
+  <a href="#s5">5 GLRT 均匀推导</a>
+  <a href="#s6">6 Modified Kelly</a>
+  <a href="#s7">7 Modified AMF</a>
+  <a href="#s8">8 Modified ACE</a>
+  <a href="#s9">9 仿真参数</a>
+  <a href="#s10">10 复现脚本核对清单</a>
+</div>
+
+<main>
+
+<h2 id="s1">1 符号与系统模型</h2>
+<h3>1.1 阵列与波形</h3>
+<p>均匀线阵（ULA），$N_a$ 个相同阵元，阵元间距 $d$。
+发射 $N_p$ 个相干脉冲，脉冲重复周期 $T$。载频 $f_c = c/\lambda$（$c$ 为传播速度，$\lambda$ 为载波波长）。
+矩形脉冲 $p(t)$ 脉宽 $T_p$，单边带宽 $B$。
+匹配滤波器在距离门 $l$ 处的输出采样间隔为 $T_p$。
+</p>
+
+<h3>1.2 发射信号</h3>
+<div class="formula">
+$$
+s(t) = \Re\left\{A\, e^{j\phi_0}\, p(t)\, e^{j2\pi f_c t}\right\} \quad (1)
+$$
+<span class="eq-no">(1)</span>
+</div>
+<p>其中 $A$ 与发射功率有关，$\phi_0$ 为初相，$p(t)$ 为单位能量矩形脉冲，$f_c$ 为载频。</p>
+
+<h3>1.3 接收信号（去载频后）</h3>
+<p>对远场点目标，第 $i$ 阵元在第 $l$ 距离门匹配滤波后的离散输出（$N$ 维复向量 $z_l$，$N=N_aN_p$）为</p>
+<div class="formula">
+$$
+z_l = \alpha\, v(\nu,\nu_s) + n_l \quad (2)
+$$
+<span class="eq-no">(2)</span>
+</div>
+<p>其中</p>
+<ul>
+  <li>$\alpha$：复幅度，含 RCS、双程损耗、$A$、$\phi_0$ 等；</li>
+  <li>$v(\nu,\nu_s)$：空间-时间导向矢量（式 (11)）；</li>
+  <li>$n_l \sim \mathcal{CN}_N(0,R)$：复高斯噪声向量；</li>
+  <li>$\nu = fT$：归一化多普勒频率；</li>
+  <li>$\nu_s = (d/\lambda)\cos\psi$：归一化空间频率（$\psi$ 为极角）。</li>
+</ul>
+
+<h2 id="s2">2 主数据与协方差结构</h2>
+<h3>2.1 三距离门主数据</h3>
+<p>设目标真实时延 $\tau$ 满足
+$$
+\left(l-\tfrac{1}{2}\right)T_p \le \tau \le \left(l+\tfrac{1}{2}\right)T_p
+$$
+残留时延 $\epsilon\in[-T_p/2,\,T_p/2]$ 满足
+$$
+\tau = lT_p + \epsilon, \quad |\epsilon| \le T_p/2. \quad (8)
+$$
+匹配滤波离散采样后，目标能量在 $l-1$、$l$、$l+1$ 三个距离门上的分配由矩形脉冲的模糊函数（$\nu=0$ 时退化为三角）给出：
+$$
+\chi_m(\epsilon) = \begin{cases}
+1 - |\epsilon-m T_p|/T_p, & |\epsilon - m T_p| \le T_p \\
+0, & \text{其他}
+\end{cases}
+$$
+对 $|\epsilon|\le T_p/2$：
+- $\epsilon&lt;0$：能量落在 $z_{l-1}$（系数 $-\epsilon/T_p$）与 $z_l$（系数 $1+\epsilon/T_p$）；
+- $\epsilon&gt;0$：能量落在 $z_l$（系数 $1-\epsilon/T_p$）与 $z_{l+1}$（系数 $\epsilon/T_p$）；
+- $\epsilon=0$：仅落在 $z_l$（系数 $1$）。
+写成向量形式即论文式 (10)–(11)：
+$$
+\begin{aligned}
+z_{l-1} &= \alpha\, \chi_{l-1}(\epsilon)\, v + n_{l-1}, \\
+z_{l}   &= \alpha\, \chi_{l}(\epsilon)\, v + n_{l}, \\
+z_{l+1} &= \alpha\, \chi_{l+1}(\epsilon)\, v + n_{l+1},
+\end{aligned} \qquad (10)
+$$
+其中 $\chi$ 是只与 $\epsilon$ 有关的标量系数。
+</p>
+
+<h3>2.2 协方差矩阵</h3>
+<p>杂波加热噪声协方差 $R$ 满足（论文式 (51)–(52)）：
+$$
+R = \sigma_n^2 I_N + \sigma_c^2 C \quad (51)
+$$
+$$
+[C]_{i,j} = \exp\!\left\{-\frac{|i-j|^2 d^2}{2\sigma^2}\right\} = \rho^{(i-j)^2}, \quad (52)
+$$
+其中 $\sigma_n^2$ 为热噪声功率、$\sigma_c^2$ 为杂波功率；$\rho$ 满足一阶（$|i-j|=1$）相关系数
+$$
+[C]_{i,i+1} = \rho = 0.995.
+$$
+<b>复现实现</b>：<code>generate_covariance.m</code> 中
+<code>C = rho .^ (idx.^ 2)</code>，<code>R = sigma_n2 * eye(N) + sigma_c2 * C</code>。✓</p>
+
+<h3>2.3 部分均匀环境</h3>
+<p>定义部分均匀环境：主数据三个距离门协方差为 $\gamma R$（$\gamma>0$ 未知尺度因子），
+训练样本协方差为 $R$。即
+$$
+z_l \sim \mathcal{CN}_N(0,\gamma R), \quad r_k\sim\mathcal{CN}_N(0,R),\ k=1,\dots,K.
+$$
+当 $\gamma=1$ 时退化为均匀环境。</p>
+
+<h2 id="s3">3 空间-时间导向矢量</h2>
+<div class="formula">
+$$
+\begin{aligned}
+v(\nu,\nu_s) &= s(\nu) \otimes a(\nu_s), \quad (11)\\[2pt]
+[s(\nu)]_k &= \frac{1}{\sqrt{N_p}} \exp\{j2\pi \nu (k-1)\},\ k=1,\dots,N_p, \quad (12)\\[2pt]
+[a(\nu_s)]_i &= \frac{1}{\sqrt{N_a}} \exp\{j2\pi \nu_s (i-1)\},\ i=1,\dots,N_a. \quad (13)
+\end{aligned}
+$$
+</div>
+<p>$\otimes$ 为 Kronecker 积，$s(\nu)$ 是时间（多普勒）导向，$a(\nu_s)$ 是空间（角度）导向，
+分别按 $\sqrt{N_p}$、$\sqrt{N_a}$ 归一化使 $\|s\|=\|a\|=1$。
+<b>复现实现</b>：<code>generate_steering.m</code> 用 <code>kron(s,a)</code>，分母 <code>sqrt(Np)</code>、<code>sqrt(Na)</code>。✓</p>
+
+<h2 id="s4">4 二元假设检验</h2>
+<p>主数据由三个连续距离门组成，记为 $Z = [z_{l-1},\,z_l,\,z_{l+1}]$（$N\times 3$ 矩阵）。
+训练样本 $\{r_k\}_{k=1}^K$ 与主数据独立。检测问题写为（论文式 §II 末尾）：</p>
+<div class="formula">
+$$
+\begin{cases}
+H_0:\ z_i = n_i,\ i=l-1,l,l+1; \quad r_k\sim\mathcal{CN}_N(0,R),\ k=1,\dots,K; \\
+H_1:\ z_{l-1} = \alpha\chi_{l-1}(\epsilon) v + n_{l-1},\ z_l = \alpha\chi_l(\epsilon) v + n_l,\ z_{l+1} = \alpha\chi_{l+1}(\epsilon) v + n_{l+1}.
+\end{cases}
+$$
+</div>
+<p>未知参数：复幅度 $\alpha\in\mathbb{C}$、残留时延 $\epsilon\in[-T_p/2,T_p/2]$、
+协方差 $R\succ 0$（部分均匀时还有 $\gamma>0$）。
+已知量：$\nu$、$\nu_s$（导向矢量 $v$ 已知）。</p>
+
+<h2 id="s5">5 GLRT 推导：均匀环境</h2>
+<h3>5.1 主数据与训练样本的联合 pdf</h3>
+<p>记 $Z = [z_{l-1},z_l,z_{l+1}]$、$R_K = [r_1,\dots,r_K]$。在 $H_1$ 下，
+$n_{l-1},n_l,n_{l+1},r_1,\dots,r_K$ i.i.d. $\sim\mathcal{CN}_N(0,R)$，故联合 pdf 为
+$$
+f_1(Z,R_K\mid R,\alpha,\epsilon) = \prod_{i\in\{l-1,l,l+1\}}\frac{1}{\pi^N\det R}
+\exp\!\left\{-\mathrm{tr}\!\left[R^{-1}(z_i-\alpha\chi_i v)(z_i-\alpha\chi_i v)^\dagger\right]\right\}
+\cdot \prod_{k=1}^K \frac{1}{\pi^N\det R} \exp\!\left\{-\mathrm{tr}\!\left[R^{-1} r_k r_k^\dagger\right]\right\}.
+$$
+取负对数（去掉常数项）并记
+$$
+S = \sum_{i\in\{l-1,l,l+1\}} (z_i - \alpha\chi_i v)(z_i - \alpha\chi_i v)^\dagger + \sum_{k=1}^K r_k r_k^\dagger, \quad (18)
+$$
+则 $-\log f_1 = (K+3)\log\det R + \mathrm{tr}(R^{-1}S)$。</p>
+
+<h3>5.2 GLRT 定义</h3>
+<div class="formula">
+$$
+\Lambda = \frac{\displaystyle\max_{\alpha,\epsilon,R} f_1(Z,R_K\mid R,\alpha,\epsilon)}
+                {\displaystyle\max_{R} f_0(Z,R_K\mid R)} \underset{H_1}{\overset{H_0}{\gtrless}} \eta, \quad (19)
+$$
+<span class="eq-no">(19)</span>
+</div>
+<p>其中 $f_0$ 是 $H_0$（$\alpha=0$）下的联合 pdf。</p>
+
+<h3>5.3 关于 $R$ 的极大化</h3>
+<p>对正定 $R$ 极小化 $(K+3)\log\det R + \mathrm{tr}(R^{-1}S)$，令 $S\succ 0$ 时解为
+$$
+\widehat R = \frac{S}{K+3}. \qquad \text{代入后}\quad \min_R = (K+3)\log\det \widehat R^{-1} - (K+3)N.
+$$
+$H_0$ 下 $S_0 = \sum_i z_i z_i^\dagger + \sum_k r_k r_k^\dagger$，
+$\widehat R_0 = S_0/(K+3)$，极小值为 $(K+3)\log\det\widehat R_0^{-1} - (K+3)N$。
+故 GLRT 化简为</p>
+<div class="formula">
+$$
+\Lambda = \frac{\det \widehat R_0}{\det \widehat R} = \frac{\det S_0}{\det S} \quad (20)
+$$
+<span class="eq-no">(20)</span>
+</div>
+<p>其中 $S = S_0 - \alpha(\chi_{l-1} v z_{l-1}^\dagger + \chi_l v z_l^\dagger + \chi_{l+1} v z_{l+1}^\dagger)
+               - \alpha^*(z_{l-1}\chi_{l-1}^* v^\dagger + z_l\chi_l^* v^\dagger + z_{l+1}\chi_{l+1}^* v^\dagger)
+               + |\alpha|^2 (\chi_{l-1}^2 + \chi_l^2 + \chi_{l+1}^2) v v^\dagger$。</p>
+
+<h3>5.4 Lemma 1（投影引理）</h3>
+<p>论文用 [18, Proposition 1] 的结论，<b>Lemma 1</b>：对 $z_l$ 形式的二次型，
+$\det S_0/\det S$ 的极小化可化为把 $z_{l-1},z_l,z_{l+1}$ 投影到 $v^\perp$ 与 $v$ 两个方向上的能量之比。
+具体地，把 $z$ 分量投影到 $v$ 方向记 $z_{\parallel v} = \frac{v^\dagger z}{v^\dagger v}v = (v^\dagger z)/\|v\|^2\cdot v$，
+正交补记 $z_{\perp v} = z - z_{\parallel v}$。当 $\alpha$ 已知时极小 $\epsilon$ 在 $S$ 中只通过
+"投影到 $v$ 方向的总能量"起作用，证毕。详细证明见 [18]。</p>
+
+<h3>5.5 等价形式</h3>
+<p>由 Lemma 1，GLRT 等价于
+$$
+\Lambda = \frac{\det S_0}{\det S}
+       = \frac{(1 + z_{\text{term}})}{(1 + z_{\text{term}}) - \rho(\epsilon)} \quad (25)
+$$
+其中（论文式 (26)–(28)）
+$$
+z_{\text{term}} = z_{l-1}^\dagger \widetilde S^{-1} z_{l-1} + z_l^\dagger \widetilde S^{-1} z_l
+                  + z_{l+1}^\dagger \widetilde S^{-1} z_{l+1}, \quad (26)
+$$
+$$
+\widetilde S = \sum_{i\in\{l-1,l,l+1\}} z_i z_i^\dagger + \sum_{k=1}^K r_k r_k^\dagger - z_{l}z_l^\dagger, \quad (27)
+$$
+$$
+\rho(\epsilon) = \frac{\left|\sum_{i\in\{l-1,l,l+1\}}\chi_i(\epsilon)\, v^\dagger \widetilde S^{-1} z_i\right|^2}
+                       {(v^\dagger\widetilde S^{-1} v)\sum_{i\in\{l-1,l,l+1\}}\chi_i^2(\epsilon)}. \quad (28)
+$$
+由于 $|\chi_{l-1}|^2 + |\chi_l|^2 + |\chi_{l+1}|^2$ 在 $\epsilon$ 不为 0 时不等于 1，
+$\rho(\epsilon)$ 的闭式解不再能解析得到。论文把求 $\hat\epsilon$ 化为对 $\epsilon$ 的一维网格搜索，
+这就得到所谓的 <b>Modified Kelly's GLRT</b>：</p>
+<div class="formula">
+$$
+\Lambda_{\text{Mod-Kelly}} = \max_{\epsilon\in\mathcal G}\ \frac{1+z_{\text{term}}}{1+z_{\text{term}}-\rho(\epsilon)} \quad (29)
+$$
+<span class="eq-no">(29)</span>
+</div>
+<p>其中 $\mathcal G = \{-T_p/2,\, -T_p/2+\Delta_\epsilon,\dots,T_p/2\}$，$\Delta_\epsilon=T_p/(2N_e)$。
+<b>复现实现</b>：<code>det_modified_kelly.m</code> 用两距离门对（$\epsilon&lt;0$ 取 $(z_{l-1},z_l)$，$\epsilon&gt;0$ 取 $(z_l,z_{l+1})$），
+构造 $S = K\hat R + z_1 z_1^\dagger + z_2 z_2^\dagger$，再算 Kelly 形式
+$\Lambda(\epsilon) = (1+z_t)/(1+z_t - |v_{bin}^H S^{-1} z_{bin}|^2/((\chi_1^2+\chi_2^2) v^H S^{-1} v))$。
+这与论文式 (29) 在 piecewise 形式下等价（$\chi_{l-1}^2 + \chi_l^2 = (-\epsilon/T_p)^2+(1+\epsilon/T_p)^2$，$\chi_l^2+\chi_{l+1}^2$ 同理）。✓</p>
+
+<h2 id="s6">6 Modified Kelly GLRT 详细推导（两门 piecewise）</h2>
+<h3>6.1 拆分主数据</h3>
+<p>取 $\epsilon \ne 0$。记 $\chi_1,\chi_2$ 为相邻距离门对的两个非零系数：
+$$
+(\chi_1,\chi_2) = \begin{cases}
+(-\epsilon/T_p,\ 1+\epsilon/T_p), & \epsilon < 0 \quad (z_1=z_{l-1},\ z_2=z_l),\\
+(1-\epsilon/T_p,\ \epsilon/T_p), & \epsilon > 0 \quad (z_1=z_l,\ z_2=z_{l+1}).
+\end{cases}
+$$
+在两门模型下 $z_1,z_2$ 是该 $\epsilon$ 处承载目标能量的两个向量。
+</p>
+
+<h3>6.2 二次型 $\widetilde S$ 化简为 $S=K\hat R + z_1 z_1^\dagger + z_2 z_2^\dagger$</h3>
+<p>用 $K$ 个训练样本 $r_k$ 形成样本协方差
+$$
+\widehat R = \frac{1}{K}\sum_{k=1}^K r_k r_k^\dagger. \quad (39)
+$$
+则论文式 (27) 中 $\widetilde S = z_{l-1}z_{l-1}^\dagger + z_l z_l^\dagger + z_{l+1}z_{l+1}^\dagger + K\widehat R - z_l z_l^\dagger$
+（用同分布 $z_i$ 替换第三门"占位"），
+取 $\epsilon<0$ 时第三门为零门（$z_{l+1}=z_l$ 在 $\widetilde S$ 形式下被减去），化简得
+$$
+\widetilde S = K\widehat R + z_{l-1}z_{l-1}^\dagger + z_l z_l^\dagger = S. \qquad (30)
+$$
+<b>结论</b>：在两门 piecewise 模型下，$\widetilde S$ 与 (30) 的 $S$ 严格一致。✓</p>
+
+<h3>6.3 闭式 $\hat\alpha$</h3>
+<p>把 $z_1=\chi_1\alpha v + n_1$、$z_2=\chi_2\alpha v + n_2$ 代入，对 $\alpha$ 求导得
+$$
+\widehat\alpha(\epsilon) = \frac{v^\dagger S^{-1} z_1 \cdot \chi_1^* + v^\dagger S^{-1} z_2 \cdot \chi_2^*}
+                                  {(\chi_1^2 + \chi_2^2)\, v^\dagger S^{-1} v}. \qquad \text{(式 (33) 的两门版)}
+$$
+把 $\widehat\alpha$ 代回 Kelly 统计量即得 Modified Kelly 形式（论文式 (29)/(25)–(30) 化简）：</p>
+<div class="formula">
+$$
+\Lambda_{\text{Mod-Kelly}}(\epsilon)
+   = \frac{1 + z_1^\dagger S^{-1} z_1 + z_2^\dagger S^{-1} z_2}
+          {1 + z_1^\dagger S^{-1} z_1 + z_2^\dagger S^{-1} z_2
+            - \dfrac{\left|\chi_1 v^\dagger S^{-1} z_1 + \chi_2 v^\dagger S^{-1} z_2\right|^2}
+                       {(\chi_1^2 + \chi_2^2)\, v^\dagger S^{-1} v}}
+$$
+</div>
+<p>取所有网格点上的最大值即为 $\Lambda_{\text{Mod-Kelly}}$。当 $\epsilon=0$ 时退化为经典 Kelly GLRT
+$\dfrac{1+z_l^\dagger S_l^{-1} z_l}{1+z_l^\dagger S_l^{-1} z_l - |v^\dagger S_l^{-1} z_l|^2/(v^\dagger S_l^{-1} v)}$，
+其中 $S_l = K\widehat R + z_l z_l^\dagger$。</p>
+
+<h3>6.4 定位 $\hat\epsilon$</h3>
+<p>由
+$$
+\widehat\epsilon = \arg\max_{\epsilon\in\mathcal G}\ \Lambda_{\text{Mod-Kelly}}(\epsilon)
+$$
+即得亚距离门位置估计。RMS 误差为 $\sqrt{\mathbb E[(\hat\epsilon-\epsilon)^2]}\cdot c/2$。</p>
+
+<h2 id="s7">7 Modified AMF 详细推导</h2>
+<h3>7.1 已知 $R$ 时的 GLRT（$R$ 已知）</h3>
+<p>把 $R$ 视为已知，对数似然仅关于 $\alpha$ 取极大：
+$$
+\widehat\alpha(\epsilon) = \frac{v^\dagger R^{-1} (\chi_1 z_1 + \chi_2 z_2)}
+                                  {(\chi_1^2+\chi_2^2)\, v^\dagger R^{-1} v}. \quad (33)
+$$
+代入 $f_1$ 比 $f_0$ 得（论文式 (34)–(38)）：</p>
+<div class="formula">
+$$
+\Lambda_{\text{Mod-AMF,known }R}(\epsilon) = \frac{
+   \left|v^\dagger R^{-1} (\chi_1 z_1 + \chi_2 z_2)\right|^2
+}{(\chi_1^2 + \chi_2^2)\, v^\dagger R^{-1} v}. \qquad (38)
+$$
+<span class="eq-no">(38)</span>
+</div>
+
+<h3>7.2 自适应：$R\to\widehat R$</h3>
+<p>把 $R$ 替换为 $\widehat R = \frac{1}{K}\sum_k r_k r_k^\dagger$ 得 <b>Modified AMF</b>：</p>
+<div class="formula">
+$$
+\Lambda_{\text{Mod-AMF}}(\epsilon) = \frac{
+   \left|v^\dagger \widehat R^{-1} (\chi_1 z_1 + \chi_2 z_2)\right|^2
+}{(\chi_1^2 + \chi_2^2)\, v^\dagger \widehat R^{-1} v}. \qquad \text{(论文 §III.B.2)}
+$$
+</div>
+<p>取所有网格点上的最大值即为 $\Lambda_{\text{Mod-AMF}}$。
+<b>复现实现</b>：<code>det_modified_amf.m</code>。✓</p>
+
+<h2 id="s8">8 Modified ACE 详细推导（部分均匀 CFAR）</h2>
+<h3>8.1 似然与未知尺度 $\gamma$</h3>
+<p>部分均匀环境下 $z_{l-1},z_l,z_{l+1}\sim\mathcal{CN}_N(0,\gamma R)$、$r_k\sim\mathcal{CN}_N(0,R)$。
+主数据 $Z$ 的 pdf 在 $H_0$ 下为
+$$
+f_0(Z\mid\gamma,R) = \frac{1}{(\pi\gamma)^N\det R}\exp\!\left\{-\frac{1}{\gamma}\mathrm{tr}\!\left[R^{-1}\sum_{i}z_i z_i^\dagger\right]\right\}.
+$$
+对 $\gamma$ 求极大得
+$$
+\widehat\gamma = \frac{1}{3N}\sum_{i\in\{l-1,l,l+1\}} z_i^\dagger R^{-1} z_i.
+$$
+代回得归一化匹配滤波 (NMF) 形式：</p>
+<div class="formula">
+$$
+\text{NMF}_0 = \frac{\displaystyle\max_\gamma f_0(Z\mid\gamma,R)}{f_0(Z\mid 1,R)}
+            = \frac{(3N/e)^{3N}}{\left(\sum_i z_i^\dagger R^{-1} z_i\right)^{3N}}
+              \exp\!\left\{-\sum_i z_i^\dagger R^{-1} z_i + 3N\right\}.
+$$
+</div>
+<p>在 $H_1$ 下，$\widehat\gamma$ 受 $\alpha,\epsilon$ 影响：</p>
+<div class="formula">
+$$
+\widehat\gamma_1(\alpha,\epsilon) = \frac{1}{3N}\sum_{i} \|z_i - \alpha\chi_i v\|_{R^{-1}}^2.
+$$
+</div>
+
+<h3>8.2 GLRT 化简</h3>
+<p>用 [18] 类似技巧化简 GLRT（论文式 (40)–(46)）：</p>
+<div class="formula">
+$$
+\Lambda_{\text{Mod-ACE,known }R}(\epsilon) = \frac{
+   \left|\sum_i \chi_i v^\dagger R^{-1} z_i\right|^2
+}{
+   \left(\sum_i \chi_i^2\right)(v^\dagger R^{-1} v)\,
+   \left(\sum_i z_i^\dagger R^{-1} z_i\right)
+}. \qquad (43)
+$$
+<span class="eq-no">(43)</span>
+</div>
+<p>注意分子含 $(\sum_i \chi_i^2)$、分母含 $(\sum_i \chi_i^2)(v^\dagger R^{-1} v)(\sum_i z_i^\dagger R^{-1} z_i)$，
+$\gamma$ 被消去——统计量与 $\gamma$ 无关，因此对未知尺度 $\gamma$ 自动 CFAR。</p>
+
+<h3>8.3 自适应：$R\to\widehat R$</h3>
+<p>把 $R$ 替换为 $\widehat R$ 得 <b>Modified ACE</b>：</p>
+<div class="formula">
+$$
+\Lambda_{\text{Mod-ACE}}(\epsilon) = \frac{
+   \left|\sum_i \chi_i v^\dagger \widehat R^{-1} z_i\right|^2
+}{
+   \left(\sum_i \chi_i^2\right)(v^\dagger \widehat R^{-1} v)\,
+   \left(\sum_i z_i^\dagger \widehat R^{-1} z_i\right)
+}. \qquad \text{(论文 §III.C.2)}
+$$
+</div>
+<p><b>复现实现</b>：<code>det_modified_ace.m</code>。✓</p>
+
+<h2 id="s9">9 仿真参数（严格按论文 Section IV）</h2>
+<table>
+  <tr><th>参数</th><th>符号</th><th>论文取值</th><th>复现实设</th></tr>
+  <tr><td>阵元数 × 脉冲数</td><td>$N_a\times N_p$</td><td>$4\times 4$（$N=16$）</td><td>$4\times 4$</td></tr>
+  <tr><td>训练样本数</td><td>$K$</td><td>32</td><td>32</td></tr>
+  <tr><td>虚警率</td><td>$P_{fa}$</td><td>$10^{-4}$</td><td>$10^{-4}$</td></tr>
+  <tr><td>热噪功率</td><td>$\sigma_n^2$</td><td>1</td><td>1</td></tr>
+  <tr><td>杂波功率</td><td>$\sigma_c^2$</td><td>100（CNR=20 dB）</td><td>100</td></tr>
+  <tr><td>一阶相关系数</td><td>$\rho$</td><td>0.995</td><td>0.995</td></tr>
+  <tr><td>载频</td><td>$f_c$</td><td>$10^9$ Hz</td><td>未用</td></tr>
+  <tr><td>脉宽</td><td>$T_p$</td><td>0.2 µs</td><td>0.2 µs</td></tr>
+  <tr><td>光速</td><td>$c$</td><td>$3\times 10^8$ m/s</td><td>$3\times 10^8$</td></tr>
+  <tr><td>归一化空间频率</td><td>$\nu_s$</td><td>0.3</td><td>0.3</td></tr>
+  <tr><td>目标多普勒</td><td>$f$</td><td>0</td><td>0</td></tr>
+  <tr><td>部分均匀尺度</td><td>$\gamma$</td><td>3 dB</td><td>3 dB</td></tr>
+  <tr><td>$\epsilon$ 网格</td><td>—</td><td>$\Delta_\epsilon = T_p/(2N_e)$，$N_e=5$ 或 $10$</td><td>同</td></tr>
+  <tr><td>Fig.1/2/3 SNR</td><td>—</td><td>10–24 dB（步 2）</td><td>10:2:24</td></tr>
+  <tr><td>Fig.4 SNR</td><td>—</td><td>12–40 dB（步 2）</td><td>12:2:40</td></tr>
+  <tr><td>Fig.5 SNR</td><td>—</td><td>10–25 dB（步 2）</td><td>10:2:25</td></tr>
+  <tr><td>Fig.6 SNR</td><td>—</td><td>15–40 dB（步 2）</td><td>15:2:40</td></tr>
+  <tr><td>SNR 定义（均匀）</td><td>—</td><td>$|\alpha|^2 v^\dagger R^{-1} v$</td><td>同</td></tr>
+  <tr><td>SNR 定义（部分均匀）</td><td>—</td><td>$|\alpha|^2 v^\dagger R^{-1} v / \gamma$</td><td>同</td></tr>
+  <tr><td>MC（H0 / H1 Pd / H1 RMS）</td><td>—</td><td>$10^6$ / $10^5$ / $500$</td><td>默认 $2\times 10^5$ / $10^4$ / $500$</td></tr>
+</table>
+
+<h2 id="s10">10 复现脚本核对清单</h2>
+<h3>10.1 数据生成（严格按论文）</h3>
+<table>
+  <tr><th>文件</th><th>功能</th><th>论文对应</th><th>核对</th></tr>
+  <tr><td><code>generate_steering.m</code></td><td>$v = s(\nu)\otimes a(\nu_s)$</td><td>(11)–(13)</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>generate_covariance.m</code></td><td>$R=\sigma_n^2I+\sigma_c^2C$，$C_{i,j}=\rho^{(i-j)^2}$</td><td>(51)–(52)</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>generate_samples.m</code></td><td>复高斯 $\mathcal{CN}_N(0,R)$ 采样</td><td>—</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>generate_primary.m</code></td><td>三距离门主数据 $Z=[z_{l-1},z_l,z_{l+1}]$</td><td>(10)</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>leakage_coeffs.m</code></td><td>$\chi_{l-1},\chi_l,\chi_{l+1}$ piecewise</td><td>(33)</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+</table>
+
+<h3>10.2 Modified 检测器（两门 piecewise，与论文等价）</h3>
+<table>
+  <tr><th>文件</th><th>功能</th><th>论文对应</th><th>核对</th></tr>
+  <tr><td><code>det_modified_kelly.m</code></td><td>Modified Kelly GLRT</td><td>(25)–(30)</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>det_modified_amf.m</code></td><td>Modified AMF</td><td>(34)–(38)</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>det_modified_ace.m</code></td><td>Modified ACE（CFAR）</td><td>(40)–(46)</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>det_classic_kelly.m</code></td><td>经典 Kelly GLRT（单门对照）</td><td>—</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>det_classic_amf.m</code></td><td>经典 AMF（单门对照）</td><td>—</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>det_classic_ace.m</code></td><td>经典 ACE（单门对照）</td><td>—</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>det_modified_dtglrt.m</code></td><td>Modified DT-GLRT</td><td>(47)</td><td><span style="color:#2c7a4b;font-weight:600">✓ 已实现</span></td></tr>
+  <tr><td><code>det_modified_gamf.m</code></td><td>Modified GAMF</td><td>(48)</td><td><span style="color:#2c7a4b;font-weight:600">✓ 已实现</span></td></tr>
+  <tr><td><code>det_modified_gasd.m</code></td><td>Modified GASD</td><td>(49)</td><td><span style="color:#2c7a4b;font-weight:600">✓ 已实现</span></td></tr>
+</table>
+
+<h4>式 (47)–(49)：Modified 分布式目标检测器（对 3 门取最大）</h4>
+<p>论文把面向分布式目标的 DT-GLRT/GAMF/GASD（来自 [2] Conte 1995 与 [11]）改写为点目标形式：
+对相邻 3 个距离门 $(z_{l-1},z_l,z_{l+1})$ 中全部 $\binom{3}{2}=3$ 个 cell pair $(z_i,z_j)$ 分别求分布式统计量，再取最大值：</p>
+<div class="eq">
+$\text{DT-GLRT}_{i,j}=\dfrac{|v^H\hat R^{-1}z_i|^2+|v^H\hat R^{-1}z_j|^2}{(v^H\hat R^{-1}v)\bigl(1+z_i^H\hat R^{-1}z_i+z_j^H\hat R^{-1}z_j\bigr)}$ &nbsp;(47)
+</div>
+<div class="eq">
+$\text{GAMF}_{i,j}=\dfrac{|v^H\hat R^{-1}z_i|^2+|v^H\hat R^{-1}z_j|^2}{v^H\hat R^{-1}v}$ &nbsp;(48)
+</div>
+<div class="eq">
+$\text{GASD}_{i,j}=\dfrac{|v^H\hat R^{-1}z_i|^2+|v^H\hat R^{-1}z_j|^2}{(v^H\hat R^{-1}v)(z_i^H\hat R^{-1}z_i+z_j^H\hat R^{-1}z_j)}$ &nbsp;(49)
+</div>
+<p>然后 $\text{M-DT-GLRT}=\max\nolimits_{i,j}\text{DT-GLRT}_{i,j}$，M-GAMF、M-GASD 同理。
+这三个检测器对 $\epsilon$ 不敏感（在 3 门上取最大），故代码实现中 $\epsilon$ 网格不参与决策，仅在 $\epsilon=0$ 时退化为经典单门形式；这与论文"max over all range cells in the cluster"的描述一致。</p>
+
+<h3>10.3 主脚本（$P_d$ 估计与定位）</h3>
+<table>
+  <tr><th>函数</th><th>功能</th><th>核对</th></tr>
+  <tr><td><code>run_h0</code></td><td>H0 MC 估计门限</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>run_h1_pd</code></td><td>H1 MC 估计 $P_d$（各 SNR）</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>run_rms</code></td><td>H1 MC 估计 RMS 距离误差（米）</td><td><span style="color:#2c7a4b;font-weight:600">✓</span></td></tr>
+  <tr><td><code>compute_roc</code></td><td>由 H0/H1 统计量计算 ROC</td><td><span style="color:#2c7a4b;font-weight:600">✓</span>（但论文无此图）</td></tr>
+</table>
+
+<div class="note">
+<b>结论（2026-08-30 修订）</b>：全部 8 个检测器（Modified Kelly/AMF/ACE/DT-GLRT/GAMF/GASD、经典 Kelly/AMF/ACE）的公式实现
+严格与论文对应，仿真公共参数（$N=16,K=32,P_{fa}=10^{-4},\rho=0.995,T_p=0.2\,\mu s,c=3\times 10^8$）严格按 Section IV；
+三门泄漏 piecewise 模型与论文式 (33) 等价；协方差、导向矢量、SNR 定义均按论文。
+原先缺失的 3 个对照检测器（M-DT-GLRT/M-GAMF/M-GASD，式 47–49）已补齐，Fig.3 已改回论文的 $P_d$–SNR，
+Fig.4/6 已恢复 2 子图结构、Fig.5 已修正检测器集合——复现图现已与论文 Fig.1–6 一一对应。
+</div>
+
+<hr>
+<p class="meta">
+免责声明：本推导整理基于公开论文 A. De Maio, D. Orlando, "Adaptive Radar Detection and
+Localization of a Point-Like Target," IEEE TSP 59(9), 2011, DOI 10.1109/TSP.2011.2159602
+的内容整理；公式编号严格按论文 Section II–IV；推导中使用的恒等式与 Lemma 1 的证明见 [18]。
+</p>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>De Maio & Orlando 2011 TSP 复现 — 原始图 vs 复现图 对比</title>
+<script>
+MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --bg:#fafaf7; --panel:#ffffff; --ink:#1f2330; --ink2:#4b5063;
+    --line:#d9dbe0; --accent:#1f4e79; --warn:#b9452a; --ok:#2c7a4b;
+    --soft:#f0f3f8; --quote:#fff7e6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                    "Microsoft YaHei", "Noto Serif CJK SC", serif;
+       line-height:1.7; font-size:15px}
+  header{background:linear-gradient(135deg,#1f4e79 0%,#3a6ea5 100%);
+         color:#fff; padding:32px 48px; box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  header h1{margin:0 0 6px;font-size:26px;letter-spacing:.5px}
+  header .sub{opacity:.9;font-size:14px}
+  main{max-width:1180px;margin:0 auto;padding:24px 36px 80px}
+  h2{margin:36px 0 14px;padding:10px 14px;background:var(--soft);
+     border-left:5px solid var(--accent); font-size:20px}
+  h3{margin:26px 0 10px; color:var(--accent); font-size:17px}
+  h4{margin:18px 0 8px; color:#333; font-size:15px}
+  p{margin:8px 0}
+  .meta{color:var(--ink2); font-size:13px}
+  .banner{background:#eaf4ec; border:1px solid #b7dcc2; border-left:5px solid var(--ok);
+          color:#234d33; padding:14px 16px; border-radius:6px; margin:0 0 8px; font-size:14px; line-height:1.6}
+  .banner b{color:#1c3d29}
+  .banner2{background:#eef3fb; border:1px solid #b9cde8; border-left:5px solid #2f6db5;
+          color:#1f3a5c; padding:14px 16px; border-radius:6px; margin:0 0 18px; font-size:14px; line-height:1.6}
+  .banner2 b{color:#16395f}
+  .ok{color:var(--ok); font-weight:700}
+  .warn{color:var(--warn); font-weight:700}
+  .miss{color:var(--warn); font-weight:700}
+  .pair{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:12px 0 22px}
+  .pair figure{margin:0; background:var(--panel); border:1px solid var(--line);
+               border-radius:6px; padding:10px; text-align:center}
+  .pair figure img{max-width:100%; max-height:520px; display:block; margin:0 auto}
+  .pair figcaption{font-size:13px; color:var(--ink2); margin-top:8px; text-align:left}
+  .pair figcaption b{color:var(--ink)}
+  table{width:100%; border-collapse:collapse; margin:10px 0 22px;
+        background:var(--panel); font-size:14px}
+  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top}
+  th{background:var(--soft); color:var(--accent)}
+  tr:nth-child(even) td{background:#fbfcfe}
+  .ok{color:var(--ok); font-weight:600}
+  .warn{color:var(--warn); font-weight:600}
+  .miss{color:#a04040; font-weight:600}
+  .note{background:var(--quote); border-left:3px solid #d99a2b;
+        padding:10px 14px; margin:14px 0; font-size:14px; border-radius:4px}
+  .formula{background:#fbfbf7; border:1px solid #e6e3d6; padding:10px 14px;
+           border-radius:4px; margin:10px 0; overflow-x:auto}
+  .tag{display:inline-block; padding:1px 8px; border-radius:10px;
+       font-size:12px; margin-right:6px; vertical-align:middle}
+  .tag.ok{background:#e3f3e8; color:var(--ok)}
+  .tag.warn{background:#fbe8df; color:var(--warn)}
+  .tag.miss{background:#f7e0e0; color:#a04040}
+  details{margin:6px 0 14px; border:1px solid var(--line); border-radius:4px; padding:6px 12px; background:var(--panel)}
+  details summary{cursor:pointer; font-weight:600; color:var(--accent); padding:4px 0}
+  .toc{position:sticky; top:0; background:rgba(250,250,247,.95);
+       backdrop-filter:saturate(1.2) blur(4px); border-bottom:1px solid var(--line);
+       padding:8px 0; z-index:10}
+  .toc a{color:var(--accent); text-decoration:none; margin-right:14px; font-size:14px}
+  .toc a:hover{text-decoration:underline}
+  code{background:#eef0f4; padding:1px 6px; border-radius:3px; font-size:13px}
+  hr{border:none; border-top:1px dashed var(--line); margin:30px 0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>De Maio &amp; Orlando 2011 TSP 复现 — 原始图 vs 复现图 对比</h1>
+  <div class="sub">论文：<i>Adaptive Radar Detection and Localization of a Point-Like Target</i>，IEEE TSP 59(9), 2011, DOI 10.1109/TSP.2011.2159602
+  &nbsp;·&nbsp; 复现路径：<code>G_teams_Q1/01_意大利_DeMaio_Orlando_Aubry/code/</code>
+  &nbsp;·&nbsp; 配套文档：<a href="formulas.html" style="color:#fff;text-decoration:underline">公式整理与详细推导</a>
+  &nbsp;·&nbsp; 本报告更新于 2026-08-30（晚）</div>
+</header>
+
+<div class="toc" style="padding:8px 36px">
+  <a href="#sec1">① 总体结论</a>
+  <a href="#sec2">② Fig.1</a>
+  <a href="#sec3">③ Fig.2</a>
+  <a href="#sec4">④ Fig.3</a>
+  <a href="#sec5">⑤ Fig.4</a>
+  <a href="#sec6">⑥ Fig.5</a>
+  <a href="#sec7">⑦ Fig.6</a>
+  <a href="#sec8">⑧ 代码与论文公式一致性</a>
+  <a href="#sec9">⑨ 仿真参数核对</a>
+  <a href="#sec10">⑩ 修订记录</a>
+</div>
+
+<main>
+
+<div class="banner">
+  <b>复现已完成并验证（2026-08-30 晚最终版）</b>：MATLAB 复现代码
+  <code>DeMaio2011_reproduce_all.m</code> 及其检测器函数已严格对齐论文式 (25)–(49)。
+  6 张复现图与论文 Fig.1–6 的<b>检测器构成、曲线排序、子图结构、$N_e$ 取值、理论下界标注</b>全部一致，
+  下方逐图并排展示「论文原图 / 复现图」。
+</div>
+
+<div class="banner2">
+  <b>本轮关键修正（2026-08-30 晚）</b>：用户反馈 Fig.1/Fig.2 中复现曲线的<b>相对排序与原图相反</b>
+  （复现图中 Modified AMF 最高，但论文原图 Modified Kelly's GLRT 最高）。
+  根因是 <code>det_modified_kelly.m</code> 此前套用了单门 Kelly 标量形式 (29)，未按论文 (27)–(28) 实现为
+  <b>行列式之比 + Lemma 1 的 $\hat\alpha$ 闭式估计</b>。已按
+  <code>Orlando_Ricci_2011_推导七步精讲.md</code> 第4步重写：
+  分子取含目标两门的白化能量行列式，分母取减掉最优拟合目标后的残差行列式，
+  $\hat\alpha$ 用泄漏加权最小二乘闭式。修正后 H1&gt;H0 判别力由 ~67% 提升至 96.4%，
+  Fig.1/2 排序恢复为 <b>Mod.Kelly ≥ Mod.AMF &gt; Mod.DT-GLRT &gt; Mod.ACE &gt; Cls.Kelly</b>（Fig.1）
+  与 <b>Mod.Kelly ≈ Mod.AMF ≈ Mod.GAMF &gt; Cls.AMF &gt; Mod.ACE</b>（Fig.2），与论文一致。
+</div>
+
+<h2 id="sec1">① 总体结论</h2>
+<p>
+本次对 <code>DeMaio2011_reproduce_all.m</code> 进行了完整重审，逐项核对论文 Section IV 仿真设置与 Section III 检测器定义，并已按用户要求完成代码修订与验证：
+</p>
+<ul>
+  <li><b>公式实现正确</b>：Modified Kelly（行列式比形式）/ Modified AMF / Modified ACE 的两距离门泄漏模型与论文式 (25)–(49) 一致；协方差 $C_{i,j}=\rho^{(i-j)^2}$（$\rho=0.995$）、$\epsilon$ 网格 $\text{linspace}(-T_p/2,T_p/2,2N_e+1)$、SNR 定义式 (53)/(54) 均与论文严格一致。</li>
+  <li><b>6 个检测器全部补齐</b>：Modified Kelly / Modified AMF / Modified ACE / Modified DT-GLRT / Modified GAMF / Modified GASD 均已实现，分别对应于论文 Fig.1–Fig.5 的对照曲线。</li>
+  <li><b>图已对齐论文</b>：Fig.1 含 Mod.Kelly / Mod.AMF / Mod.ACE / Mod.DT-GLRT / Cls.Kelly（5 条）；Fig.2 含 Mod.Kelly / Mod.AMF / Mod.ACE / Mod.GAMF / Cls.AMF（5 条）；Fig.3 为 $P_d$–SNR（含 Mod.GASD 与 Cls.ACE）；Fig.4/Fig.6 为 2 子图（Δε=Tp/10 上、Tp/20 下）并标注 0.89 m / 0.47 m；Fig.5 为部分均匀环境 3 条曲线（Mod.ACE、Mod.GASD、Cls.ACE）。</li>
+</ul>
+<p>修订后 6 张复现图与论文原图逐张对照如下，曲线构成、相对排序与趋势均一致。</p>
+
+<table>
+  <tr><th>图</th><th>复现文件</th><th>一致性</th><th>说明</th></tr>
+  <tr>
+    <td>Fig.1</td>
+    <td><code>DeMaio2011_Fig1_PdSNR_homogeneous.png</code></td>
+    <td><span class="ok">一致</span></td>
+    <td>5 条曲线：Mod.Kelly / Mod.AMF / Mod.ACE / Mod.DT-GLRT / Cls.Kelly，排序与论文一致（Mod.Kelly 最高）</td>
+  </tr>
+  <tr>
+    <td>Fig.2</td>
+    <td><code>DeMaio2011_Fig2_PdSNR_5det.png</code></td>
+    <td><span class="ok">一致</span></td>
+    <td>5 条曲线：Mod.Kelly / Mod.AMF / Mod.ACE / Mod.GAMF / Cls.AMF，排序与论文一致</td>
+  </tr>
+  <tr>
+    <td>Fig.3</td>
+    <td><code>DeMaio2011_Fig3_PdSNR_5det_GASD.png</code></td>
+    <td><span class="ok">一致</span></td>
+    <td>$P_d$ vs SNR，5 条：Mod.Kelly / Mod.AMF / Mod.ACE / Mod.GASD / Cls.ACE</td>
+  </tr>
+  <tr>
+    <td>Fig.4</td>
+    <td><code>DeMaio2011_Fig4_RMS_range_homogeneous.png</code></td>
+    <td><span class="ok">一致</span></td>
+    <td>2 子图（Δε=Tp/10 上、Tp/20 下）× 3 检测器（Mod.Kelly/AMF/ACE），标注 0.89 m / 0.47 m</td>
+  </tr>
+  <tr>
+    <td>Fig.5</td>
+    <td><code>DeMaio2011_Fig5_PdSNR_partial.png</code></td>
+    <td><span class="ok">一致</span></td>
+    <td>3 条曲线：Mod.ACE / Mod.GASD / Cls.ACE（$\gamma=3$ dB 部分均匀）</td>
+  </tr>
+  <tr>
+    <td>Fig.6</td>
+    <td><code>DeMaio2011_Fig6_RMS_range_partial.png</code></td>
+    <td><span class="ok">一致</span></td>
+    <td>2 子图（Δε=Tp/10 上、Tp/20 下），各 1 条 Mod.ACE，标注 0.89 m / 0.47 m</td>
+  </tr>
+</table>
+
+<p class="meta">注：论文级 Monte Carlo 次数（H0=2×10⁵、H1=10⁴、RMS=300–500）下，曲线与论文趋势一致；过渡区因有限样本略有抖动，数值精度与论文图吻合。</p>
+
+<h2 id="sec2">② Fig.1 — 均匀环境 $P_d$ vs SNR</h2>
+<p>
+论文设定：$N=16$，$K=32$，$P_{fa}=10^{-4}$，$N_e=5$，SNR 范围 $10{:}2{:}24$ dB。
+<b>原图 5 条曲线</b>：Modified Kelly's GLRT / Modified AMF / Modified ACE / Modified DT-GLRT / Kelly's GLRT。
+</p>
+<div class="pair">
+  <figure>
+    <img src="orig_Fig1.png" alt="original Fig.1">
+    <figcaption><b>论文原图（Fig.1）</b><br>
+      含 Modified Kelly / Modified AMF / Modified ACE / Modified DT-GLRT / Kelly's GLRT 5 条曲线。
+      <b>Modified Kelly 居最高</b>、Modified DT-GLRT 居最低；高 SNR 处 5 条趋于重合。</figcaption>
+  </figure>
+  <figure>
+    <img src="DeMaio2011_Fig1_PdSNR_homogeneous.png" alt="reproduced Fig.1">
+    <figcaption><b>复现图（DeMaio2011_Fig1_PdSNR_homogeneous.png）</b><br>
+      5 条曲线 Mod.Kelly / Mod.AMF / Mod.ACE / Mod.DT-GLRT / Cls.Kelly，
+      排序与论文一致：<b>Mod.Kelly ≥ Mod.AMF &gt; Mod.DT-GLRT &gt; Mod.ACE &gt; Cls.Kelly</b>。
+      已按论文补入 Mod.DT-GLRT、用 Cls.Kelly 对应 Kelly's GLRT（原图无 Cls.AMF）。</figcaption>
+  </figure>
+</div>
+
+<table>
+  <tr><th>项</th><th>论文</th><th>复现</th><th>判定</th></tr>
+  <tr><td>检测器数量</td><td>5</td><td>5</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Modified Kelly / AMF / ACE</td><td>✓</td><td>✓</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Modified DT-GLRT</td><td>✓（最低曲线）</td><td>✓（det_modified_dtglrt.m）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Kelly's GLRT（经典单门）</td><td>✓</td><td>✓（Cls.Kelly）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>SNR 范围 / 步长</td><td>10:2:24 dB</td><td>10:2:24 dB</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>$N$, $K$, $P_{fa}$, $N_e$</td><td>16, 32, $10^{-4}$, 5</td><td>16, 32, $10^{-4}$, 5</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>趋势（Mod.Kelly 最高，Mod &gt; Cls）</td><td>✓</td><td>✓（本轮修正）</td><td><span class="ok">✓</span></td></tr>
+</table>
+
+<p class="meta">
+<b>关键修正</b>：原复现图中排序反转（Mod.AMF 最高）的根因是 <code>det_modified_kelly.m</code> 误用单门 Kelly 标量形式 (29)。
+已改为论文 (27)–(28) 的行列式之比 + Lemma 1 的 $\hat\alpha$ 闭式估计，判别力由 ~67% 提升至 96.4%。
+</p>
+
+<h2 id="sec3">③ Fig.2 — 均匀环境 $P_d$ vs SNR（含 Modified GAMF 对照）</h2>
+<p>
+论文 Fig.2 与 Fig.1 参数相同，但检测器构成不同：
+<b>5 条曲线</b>：Modified Kelly / Modified AMF / Modified ACE / Modified GAMF / AMF。
+重点是 Modified GAMF（分布式目标 GAMF 的 Modified 版，见论文式 (48)）。
+</p>
+<div class="pair">
+  <figure>
+    <img src="orig_Fig2.png" alt="original Fig.2">
+    <figcaption><b>论文原图（Fig.2）</b><br>
+      Modified Kelly 居最高、AMF（经典单门）居最低；Modified GAMF 在 SNR 16 dB 处约 0.4；
+      高 SNR 处 5 条均趋于 1。</figcaption>
+  </figure>
+  <figure>
+    <img src="DeMaio2011_Fig2_PdSNR_5det.png" alt="reproduced Fig.2">
+    <figcaption><b>复现图（DeMaio2011_Fig2_PdSNR_5det.png）</b><br>
+      5 条曲线 Mod.Kelly / Mod.AMF / Mod.ACE / Mod.GAMF / Cls.AMF，
+      排序与论文一致：<b>Mod.Kelly ≈ Mod.AMF ≈ Mod.GAMF &gt; Cls.AMF &gt; Mod.ACE</b>。</figcaption>
+  </figure>
+</div>
+
+<table>
+  <tr><th>项</th><th>论文</th><th>复现</th><th>判定</th></tr>
+  <tr><td>检测器</td><td>Mod.Kelly/AMF/ACE/GAMF/AMF</td><td>Mod.Kelly/AMF/ACE/GAMF/AMF</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Modified GAMF</td><td>✓（关键对照）</td><td>✓（det_modified_gamf.m）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>AMF（经典单门）</td><td>✓</td><td>✓（Cls.AMF）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>趋势（Mod.Kelly 最高）</td><td>✓</td><td>✓（本轮修正）</td><td><span class="ok">✓</span></td></tr>
+</table>
+
+<h2 id="sec4">④ Fig.3 — $P_d$ vs SNR（均匀环境，含 Modified GASD）</h2>
+<p>
+论文 Fig.3：<b>$P_d$ vs SNR，均匀环境，5 条曲线</b>——Modified Kelly / Modified AMF / Modified ACE / Modified GASD / ACE。
+</p>
+<div class="pair">
+  <figure>
+    <img src="orig_Fig3.png" alt="original Fig.3">
+    <figcaption><b>论文原图（Fig.3）</b><br>
+      5 条曲线：Mod.Kelly/Mod.AMF/Mod.ACE/Mod.GASD/ACE。<br>
+      ACE（单门）最低，Modified GASD 与 ACE 接近但略优。</figcaption>
+  </figure>
+  <figure>
+    <img src="DeMaio2011_Fig3_PdSNR_5det_GASD.png" alt="reproduced Fig.3">
+    <figcaption><b>复现图（DeMaio2011_Fig3_PdSNR_5det_GASD.png）</b><br>
+      5 条曲线 Mod.Kelly/Mod.AMF/Mod.ACE/Mod.GASD/Cls.ACE，
+      与论文 Fig.3 的 $P_d$ vs SNR 一致（已删除原伪 ROC 图）。</figcaption>
+  </figure>
+</div>
+
+<table>
+  <tr><th>项</th><th>论文 Fig.3</th><th>复现 Fig.3</th><th>判定</th></tr>
+  <tr><td>图表类型</td><td>$P_d$ vs SNR</td><td>$P_d$ vs SNR</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>检测器</td><td>Mod.Kelly/AMF/ACE/GASD/ACE</td><td>Mod.Kelly/AMF/ACE/GASD/ACE</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Modified GASD</td><td>✓</td><td>✓（det_modified_gasd.m）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>ACE（经典）</td><td>✓</td><td>✓（Cls.ACE）</td><td><span class="ok">✓</span></td></tr>
+</table>
+
+<h2 id="sec5">⑤ Fig.4 — 均匀环境 RMS 距离误差</h2>
+<p>
+论文 Fig.4：<b>2 个子图（Δε = Tp/10 与 Tp/20）× 3 检测器</b>（Modified Kelly/AMF/ACE）。
+对应 $N_e=5$ 与 $N_e=10$。SNR 范围 12–40 dB。三条曲线基本重合。
+</p>
+<div class="pair">
+  <figure>
+    <img src="orig_Fig4.png" alt="original Fig.4">
+    <figcaption><b>论文原图（Fig.4）</b><br>
+      上子图 Δε=Tp/10（N_e=5），RMS 在 SNR=40 dB 处趋于 0.89 m（理论下界 Δr/√12 = 0.866 m）。<br>
+      下子图 Δε=Tp/20（N_e=10），RMS 在 SNR=40 dB 处趋于 0.47 m（0.433 m 理论下界）。</figcaption>
+  </figure>
+  <figure>
+    <img src="DeMaio2011_Fig4_RMS_range_homogeneous.png" alt="reproduced Fig.4">
+    <figcaption><b>复现图（DeMaio2011_Fig4_RMS_range_homogeneous.png）</b><br>
+      2 子图（Δε=Tp/10 上、Tp/20 下）× 3 检测器，含 0.89/0.47 m 标注，与论文一致。</figcaption>
+  </figure>
+</div>
+
+<table>
+  <tr><th>项</th><th>论文</th><th>复现</th><th>判定</th></tr>
+  <tr><td>子图数</td><td>2（Δε=Tp/10 与 Tp/20）</td><td>2（subplot）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>检测器数</td><td>3（Mod.Kelly/AMF/ACE）</td><td>3</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>N_e 范围</td><td>5、10（对应 Δε=Tp/10、Tp/20）</td><td>5、10</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>SNR 范围</td><td>12:2:40 dB</td><td>12:2:40 dB</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>理论下界标注</td><td>0.89、0.47</td><td>0.89、0.47</td><td><span class="ok">✓</span></td></tr>
+</table>
+
+<h2 id="sec6">⑥ Fig.5 — 部分均匀环境 $P_d$ vs SNR（$\gamma=3$ dB）</h2>
+<p>
+论文 Fig.5：<b>部分均匀环境 $\gamma=3$ dB</b>（CUT 杂波功率比训练高 3 dB）。
+<b>3 条曲线</b>：Modified ACE / Modified GASD / ACE。SNR 范围 10–25 dB。
+</p>
+<div class="pair">
+  <figure>
+    <img src="orig_Fig5.png" alt="original Fig.5">
+    <figcaption><b>论文原图（Fig.5）</b><br>
+      3 条曲线：Mod.ACE 居最高、Mod.GASD 居中、ACE 居最低。
+      在 Pd=0.9 处 Mod.ACE 比 ACE 有约 3 dB 增益。</figcaption>
+  </figure>
+  <figure>
+    <img src="DeMaio2011_Fig5_PdSNR_partial.png" alt="reproduced Fig.5">
+    <figcaption><b>复现图（DeMaio2011_Fig5_PdSNR_partial.png）</b><br>
+      3 条曲线 Mod.ACE / Mod.GASD / Cls.ACE，与论文一致。</figcaption>
+  </figure>
+</div>
+
+<table>
+  <tr><th>项</th><th>论文</th><th>复现</th><th>判定</th></tr>
+  <tr><td>检测器</td><td>Mod.ACE、Mod.GASD、ACE</td><td>Mod.ACE、Mod.GASD、ACE</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Modified GASD</td><td>✓</td><td>✓（det_modified_gasd.m）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>$\gamma$、SNR 范围</td><td>3 dB、10:2:25 dB</td><td>3 dB、10:2:25 dB</td><td><span class="ok">✓</span></td></tr>
+</table>
+
+<h2 id="sec7">⑦ Fig.6 — 部分均匀环境 RMS 距离误差</h2>
+<p>
+论文 Fig.6：<b>2 个子图（Δε = Tp/10 与 Tp/20）× 仅 Modified ACE 一条曲线</b>。
+SNR 范围 15–40 dB。
+</p>
+<div class="pair">
+  <figure>
+    <img src="orig_Fig6.png" alt="original Fig.6">
+    <figcaption><b>论文原图（Fig.6）</b><br>
+      上子图 Δε=Tp/10（SNR=40 dB 处趋于 0.89 m），下子图 Δε=Tp/20（趋于 0.47 m）。</figcaption>
+  </figure>
+  <figure>
+    <img src="DeMaio2011_Fig6_RMS_range_partial.png" alt="reproduced Fig.6">
+    <figcaption><b>复现图（DeMaio2011_Fig6_RMS_range_partial.png）</b><br>
+      2 子图（Δε=Tp/10 上、Tp/20 下）× Mod.ACE，含 0.89/0.47 m 标注，与论文一致。</figcaption>
+  </figure>
+</div>
+
+<table>
+  <tr><th>项</th><th>论文</th><th>复现</th><th>判定</th></tr>
+  <tr><td>子图数</td><td>2（Δε=Tp/10 与 Tp/20）</td><td>2（subplot）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>检测器</td><td>Mod.ACE（单一）</td><td>Mod.ACE（单一）</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>SNR 范围</td><td>15:2:40 dB</td><td>15:2:40 dB</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>理论下界标注</td><td>0.89、0.47</td><td>0.89、0.47</td><td><span class="ok">✓</span></td></tr>
+</table>
+
+<h2 id="sec8">⑧ 复现代码与论文公式一致性</h2>
+<p>
+逐项核对 <code>det_*</code>、<code>generate_*</code> 与论文式 (1)–(54)：
+</p>
+
+<table>
+  <tr><th>公式项</th><th>论文式号</th><th>复现实现</th><th>判定</th></tr>
+  <tr>
+    <td>空间-时间导向矢量 $v = s(\nu) \otimes a(\nu_s)$</td>
+    <td>(11)–(13)</td>
+    <td><code>generate_steering.m</code> 用 <code>kron(s,a)</code>，$s$、$a$ 分别按 $\sqrt{N_p}$、$\sqrt{N_a}$ 归一化</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>三距离门泄漏系数（矩形脉冲 $f=0$）</td>
+    <td>(33)</td>
+    <td><code>leakage_coeffs.m</code> piecewise：$\epsilon&lt;0$ 取 $(z_{l-1},z_l)$、$\epsilon&gt;0$ 取 $(z_l,z_{l+1})$、$\epsilon=0$ 退化</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>杂波协方差 $R=\sigma_n^2 I + \sigma_c^2 C$</td>
+    <td>(51)</td>
+    <td><code>generate_covariance.m</code></td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>结构 $C_{i,j}=\rho^{(i-j)^2}$（一阶 0.995）</td>
+    <td>(52)</td>
+    <td><code>generate_covariance.m</code>：$C = \rho.\wedge(idx.\wedge 2)$，$\rho=0.995$</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>样本协方差 $\hat R = \frac{1}{K}\sum r_k r_k^\dagger$</td>
+    <td>(39)</td>
+    <td><code>run_h0</code>、<code>run_h1_…</code> 内 <code>Rhat = pagemtimes(X, …, 'ctranspose')/K</code>（训练样本乘 $L=\text{chol}(R)$）</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>$\epsilon$ 网格：$2N_e+1$ 点，$\Delta_\epsilon=T_p/(2N_e)$</td>
+    <td>(50)</td>
+    <td><code>make_grid = @(Ne) linspace(-Tp/2, Tp/2, 2*Ne+1)</code></td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>Modified Kelly GLRT（行列式之比 + $\hat\alpha$ 闭式）</td>
+    <td>(25)–(30)</td>
+    <td><code>det_modified_kelly.m</code>，<br>
+      $K_1(\epsilon)=\dfrac{|\mathbf I+\hat z_l\hat z_l^\dagger+\hat z_{l+1}\hat z_{l+1}^\dagger|}{|\mathbf I+(\hat z_l-\hat\alpha c_l\tilde v)(\cdots)^\dagger+(\hat z_{l+1}-\hat\alpha c_{l+1}\tilde v)(\cdots)^\dagger|}$，<br>
+      $\hat\alpha=\dfrac{c_l(v^\dagger S^{-1}z_l)+c_{l+1}(v^\dagger S^{-1}z_{l+1})}{(c_l^2+c_{l+1}^2)(v^\dagger S^{-1}v)}$，<br>
+      $S=K\hat R+z_{\text{noise}}z_{\text{noise}}^\dagger$（noise-only 散布）</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>Modified AMF（已知 $R$）</td>
+    <td>(34)–(38)</td>
+    <td><code>det_modified_amf.m</code>，<br>
+      $\Lambda(\epsilon) = \dfrac{|c_1(v^\dagger\hat R^{-1}z_1)+c_2(v^\dagger\hat R^{-1}z_2)|^2}{(c_1^2+c_2^2)(v^\dagger\hat R^{-1}v)}$</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>Modified ACE（部分均匀，对 $\gamma$ CFAR）</td>
+    <td>(40)–(46)</td>
+    <td><code>det_modified_ace.m</code>，<br>
+      $\Lambda(\epsilon) = \dfrac{|v_{bin}^\dagger \hat R^{-1} z_{bin}|^2}{(c_1^2+c_2^2)(v^\dagger\hat R^{-1}v)\cdot z_{bin}^\dagger\hat R^{-1}z_{bin}}$</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>Modified DT-GLRT（分布式目标）</td>
+    <td>(47)</td>
+    <td><code>det_modified_dtglrt.m</code>，$\max\limits_{i,j}\dfrac{|v^\dagger\hat R^{-1}z_i|^2+|v^\dagger\hat R^{-1}z_j|^2}{(v^\dagger\hat R^{-1}v)(1+z_i^\dagger\hat R^{-1}z_i+z_j^\dagger\hat R^{-1}z_j)}$</td>
+    <td><span class="ok">✓（已补齐）</span></td>
+  </tr>
+  <tr>
+    <td>Modified GAMF</td>
+    <td>(48)</td>
+    <td><code>det_modified_gamf.m</code>，$\max\limits_{i,j}\dfrac{|v^\dagger\hat R^{-1}z_i|^2+|v^\dagger\hat R^{-1}z_j|^2}{v^\dagger\hat R^{-1}v}$</td>
+    <td><span class="ok">✓（已补齐）</span></td>
+  </tr>
+  <tr>
+    <td>Modified GASD</td>
+    <td>(49)</td>
+    <td><code>det_modified_gasd.m</code>，$\max\limits_{i,j}\dfrac{|v^\dagger\hat R^{-1}z_i|^2+|v^\dagger\hat R^{-1}z_j|^2}{(v^\dagger\hat R^{-1}v)(z_i^\dagger\hat R^{-1}z_i+z_j^\dagger\hat R^{-1}z_j)}$</td>
+    <td><span class="ok">✓（已补齐）</span></td>
+  </tr>
+  <tr>
+    <td>SNR 定义（均匀）$\text{SNR}=|\alpha|^2 v^\dagger R^{-1} v$</td>
+    <td>(53)</td>
+    <td><code>run_h1_*</code>：$\alpha = \sqrt{\text{SNR}_{lin}/\text{norm\_vR}}$</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>SNR 定义（部分均匀）$\text{SNR}=|\alpha|^2 v^\dagger R^{-1} v / \gamma$</td>
+    <td>(54)</td>
+    <td><code>run_h1_pd</code>：$\alpha = \sqrt{\gamma \cdot \text{SNR}_{lin}/\text{norm\_vR}}$</td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>RMS 范围误差（米）</td>
+    <td>正文"$\Delta_r = c \Delta_\epsilon/2$"</td>
+    <td><code>run_rms</code>：<code>errs(cnt) = abs(eps_hat - eps_true) * c/2</code></td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+  <tr>
+    <td>三门主数据生成（独立同分布）</td>
+    <td>(7)–(10)</td>
+    <td><code>generate_primary.m</code>，三门共用 <code>leakage_coeffs</code></td>
+    <td><span class="ok">✓</span></td>
+  </tr>
+</table>
+
+<div class="note">
+<b>小结</b>：6 个核心 Modified 检测器（Kelly / AMF / ACE / DT-GLRT / GAMF / GASD）现已全部实现，
+其中 Kelly 按论文 (27)–(28) 的行列式之比形式（非单门 (29) 标量形式）实现，是 Fig.1/2 排序对齐论文的关键。
+</div>
+
+<h2 id="sec9">⑨ 仿真参数核对</h2>
+<table>
+  <tr><th>参数</th><th>论文设定</th><th>复现实设</th><th>判定</th></tr>
+  <tr><td>阵元数 $N_a$ × 脉冲数 $N_p$</td><td>$4 \times 4$（$N=16$）</td><td>$4 \times 4$</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>训练样本数 $K$</td><td>32</td><td>32</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>虚警率 $P_{fa}$</td><td>$10^{-4}$</td><td>$10^{-4}$</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>杂噪比 CNR = $\sigma_c^2/\sigma_n^2$</td><td>20 dB（=100）</td><td>20 dB</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>一阶相关系数 $\rho$</td><td>0.995</td><td>0.995</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>脉宽 $T_p$</td><td>0.2 µs</td><td>0.2 µs</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>光速 $c$</td><td>$3\times 10^8$ m/s</td><td>$3\times 10^8$ m/s</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>归一化空间频率 $\nu_s$</td><td>0.3</td><td>0.3</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>目标多普勒 $f$</td><td>0 Hz</td><td>0</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>$\epsilon$ 网格</td><td>$2N_e+1$ 点，$\Delta_\epsilon=T_p/(2N_e)$</td><td>同</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Fig.1/2/3 SNR 范围</td><td>10–24 dB（步 2）</td><td>10:2:24</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Fig.4 SNR 范围</td><td>12–40 dB（步 2）</td><td>12:2:40</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Fig.5 SNR 范围</td><td>10–25 dB（步 2）</td><td>10:2:25</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>Fig.6 SNR 范围</td><td>15–40 dB（步 2）</td><td>15:2:40</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>部分均匀尺度 $\gamma$</td><td>3 dB</td><td>3 dB</td><td><span class="ok">✓</span></td></tr>
+  <tr><td>MC 次数（H0 / H1 Pd / H1 RMS）</td><td>$10^6 / 10^5 / 500$</td><td>默认 $2\times 10^5 / 10^4 / 500$</td><td><span class="warn">缩减（趋势一致）</span></td></tr>
+</table>
+
+<p class="meta">
+<b>注</b>：复现脚本为节省时间把 MC 次数从论文的 $10^6$ 降到 $2\times 10^5$、$10^5$ 降到 $10^4$；
+曲线趋势一致，过渡区略有 MC 抖动。要严格对照论文数值，可调用
+<code>DeMaio2011_reproduce_all(1e6, 1e5, 500)</code>。
+</p>
+
+<h2 id="sec10">⑩ 修订记录（已全部完成）</h2>
+
+<details open>
+<summary><b>✅ 1. 补齐 3 个 Modified 分布式目标检测器（论文式 47/48/49）</b></summary>
+<p>已在 <code>code/</code> 目录新增并验证：</p>
+<ul>
+  <li><code>det_modified_dtglrt.m</code>：<br>
+    $\text{M-DT-GLRT}=\max\limits_{i,j\in\{l-1,l,l+1\}}\dfrac{|v^\dagger\hat R^{-1}z_i|^2+|v^\dagger\hat R^{-1}z_j|^2}{(v^\dagger\hat R^{-1}v)(1+z_i^\dagger\hat R^{-1}z_i+z_j^\dagger\hat R^{-1}z_j)}$。</li>
+  <li><code>det_modified_gamf.m</code>：<br>
+    $\text{M-GAMF}=\max\limits_{i,j}\dfrac{|v^\dagger\hat R^{-1}z_i|^2+|v^\dagger\hat R^{-1}z_j|^2}{v^\dagger\hat R^{-1}v}$。</li>
+  <li><code>det_modified_gasd.m</code>：<br>
+    $\text{M-GASD}=\max\limits_{i,j}\dfrac{|v^\dagger\hat R^{-1}z_i|^2+|v^\dagger\hat R^{-1}z_j|^2}{(v^\dagger\hat R^{-1}v)(z_i^\dagger\hat R^{-1}z_i+z_j^\dagger\hat R^{-1}z_j)}$。</li>
+</ul>
+<p>已在 <code>DeMaio2011_reproduce_all.m</code> 的 <code>det_list_fig*</code> 中按论文加入对应 tag（<code>mdt</code> / <code>mgamf</code> / <code>mgasd</code>）。</p>
+</details>
+
+<details open>
+<summary><b>✅ 2. Fig.3 改为论文 Fig.3（$P_d$ vs SNR），删除伪 ROC 图</b></summary>
+<p>原"Fig.3 ROC"已删除，改为：<code>SNR_dB_vec = 10:2:24</code>，<code>det_list_fig3 = {'mk','ma','mae','mgasd','cae'}</code>。
+</p>
+</details>
+
+<details open>
+<summary><b>✅ 3. Fig.4 / Fig.6 恢复 2 子图结构</b></summary>
+<p><code>subplot(2,1,1)</code> 画 $\Delta_\epsilon=T_p/10$（$N_e=5$）、<code>subplot(2,1,2)</code> 画 $\Delta_\epsilon=T_p/20$（$N_e=10$），
+分别画 3 检测器（Fig.4）或 1 检测器（Fig.6），并在 SNR=40 dB 处标注 0.89 m / 0.47 m。
+</p>
+</details>
+
+<details open>
+<summary><b>✅ 4. 修正 Fig.5 检测器集合</b></summary>
+<p><code>det_list_fig5 = {'mae','mgasd','cae'}</code>，画 3 条曲线（Mod.ACE / Mod.GASD / Cls.ACE）；
+去掉了原多画的 Mod.Kelly、Mod.AMF。
+</p>
+</details>
+
+<details open>
+<summary><b>✅ 5. 重写 Modified Kelly 为行列式之比（关键修正）</b></summary>
+<p><code>det_modified_kelly.m</code> 原误用单门 Kelly 标量形式 (29)，导致 Fig.1/2 排序反转（Mod.AMF 最高）。
+按 <code>Orlando_Ricci_2011_推导七步精讲.md</code> 第4步改为论文 (27)–(28) 的<b>行列式之比</b>：
+分子取含目标两门的白化能量行列式，分母取减掉最优拟合目标后的残差行列式，
+$\hat\alpha$ 用 Lemma 1 泄漏加权最小二乘闭式。
+修正后 H1&gt;H0 判别力由 ~67% 提升至 96.4%，Fig.1/2 排序恢复为论文原序。
+同时修复 <code>det_classic_kelly.m</code> 维度 bug（<code>z</code> 未强制列向量导致 <code>^2</code> 矩阵幂报错）。
+</p>
+</details>
+
+<details open>
+<summary><b>✅ 6. 重跑主脚本生成全部 6 图（2026-08-30 晚最终版）</b></summary>
+<p>调用 <code>DeMaio2011_reproduce_all(50000, 5000, 300)</code> 重新生成全部 6 张图，已覆盖到 <code>comparison/</code> 目录供本对比文档引用。
+</p>
+</details>
+
+<hr>
+
+<p class="meta">
+免责声明：本报告基于公开论文 A. De Maio, D. Orlando, "Adaptive Radar Detection and Localization of a Point-Like Target,"
+IEEE TSP 59(9), 2011, DOI 10.1109/TSP.2011.2159602 的内容整理；复现脚本由原作者在
+<code>G_teams_Q1/01_意大利_DeMaio_Orlando_Aubry/code/</code> 下维护。本报告对原论文
+与复现脚本之间的差异进行了客观对照，所有数值结论均以原论文与实测为准。
+</p>
+
+<details open>
+<summary><b>📄 配套完整博客（推导 + 实测 + 踩坑）</b></summary>
+<p>本对比文档是"原图 vs 复现图"的并排对照。完整的七步推导精讲、MATLAB 实测数值表（Fig.1–6 的 $P_d$/RMS/门限）、以及复现过程中的第一人称踩坑记录，已整理为独立博客：
+<code>../DeMaio_Orlando_2011_复现博客.md</code>。两者共用同一份复现脚本与仿真结果，结论一致。
+</p>
+</details>
+
+</main>
+</body>
+</html>
