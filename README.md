@@ -64,6 +64,15 @@ tools/run_xsim.bat all        # 生成 axsim.exe 自动跑到 $finish, 日志 vi
 
 详见 `tsn_8021as_gptp/README.md`、`tsn_8021as_gptp/doc/`（架构图、波形、CSDN 工程实践博客）。
 
+## DeMaio_Orlando_2011 - 点目标自适应检测与定位复现
+
+De Maio & Orlando 2011（IEEE TSP 59(9)）点目标自适应雷达检测与定位的完整复现：把跨距离门能量泄漏显式写进假设检验，推导出 Modified Kelly / AMF / ACE 系列检测器并顺带给出亚门定位。含七步公式精讲与六张图（原始 vs 复现）逐张对齐。
+
+- 推导精讲与对比：见 `DeMaio_Orlando_2011/README.md`
+- 复现代码：见 `DeMaio_Orlando_2011/code/`（含 Modified/Classic 检测器、数据生成、对比页）
+- 复现图：见 `DeMaio_Orlando_2011/images/`
+- 说明：本文档已做脱敏处理，不含任何专有雷达系统参数
+
 ## 许可 License
 
 本仓库代码采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
