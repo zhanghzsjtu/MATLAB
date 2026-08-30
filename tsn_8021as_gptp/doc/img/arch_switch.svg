@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 500" width="940" height="500" font-family="Consolas,Menlo,monospace">
+<defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b8"/></marker></defs>
+<text x="20" y="26" font-size="16" font-weight="bold" fill="#1f2d3d">多端口交换机架构 (N 端口共享一个 PHC, generate 例化)</text>
+<rect x="400" y="200" width="140" height="80" rx="8" fill="#eaf1fb" stroke="#0072BD" stroke-width="2"/>
+<text x="470.0" y="236.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">共享 PHC</text>
+<text x="470.0" y="253.0" text-anchor="middle" font-size="10" fill="#566">全网统一时间面</text>
+<rect x="40" y="80" width="130" height="90" rx="8" fill="#f3f6fb" stroke="#0072BD" stroke-width="2"/>
+<text x="105.0" y="121.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">端口0 (GM)</text>
+<text x="105.0" y="138.0" text-anchor="middle" font-size="10" fill="#566">top+bmca+servo</text>
+<text x="38" y="125" font-size="9" fill="#788" text-anchor="end">RX</text>
+<line x1="170" y1="125" x2="400" y2="240" stroke="#2ca02c" stroke-width="1.6" marker-end="url(#ah)"/>
+<line x1="400" y1="240" x2="170" y2="110" stroke="#ff7f0e" stroke-width="1.6" marker-end="url(#ah)"/>
+<rect x="40" y="210" width="130" height="90" rx="8" fill="#f3f6fb" stroke="#0072BD" stroke-width="2"/>
+<text x="105.0" y="251.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">端口1</text>
+<text x="105.0" y="268.0" text-anchor="middle" font-size="10" fill="#566">top+bmca+servo</text>
+<text x="38" y="255" font-size="9" fill="#788" text-anchor="end">RX</text>
+<line x1="170" y1="255" x2="400" y2="240" stroke="#2ca02c" stroke-width="1.6" marker-end="url(#ah)"/>
+<line x1="400" y1="240" x2="170" y2="240" stroke="#ff7f0e" stroke-width="1.6" marker-end="url(#ah)"/>
+<rect x="40" y="340" width="130" height="90" rx="8" fill="#f3f6fb" stroke="#0072BD" stroke-width="2"/>
+<text x="105.0" y="381.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">端口2</text>
+<text x="105.0" y="398.0" text-anchor="middle" font-size="10" fill="#566">top+bmca+servo</text>
+<text x="38" y="385" font-size="9" fill="#788" text-anchor="end">RX</text>
+<line x1="170" y1="385" x2="400" y2="240" stroke="#2ca02c" stroke-width="1.6" marker-end="url(#ah)"/>
+<line x1="400" y1="240" x2="170" y2="370" stroke="#ff7f0e" stroke-width="1.6" marker-end="url(#ah)"/>
+<rect x="580" y="200" width="150" height="60" rx="8" fill="#eaf1fb" stroke="#0072BD" stroke-width="2"/>
+<text x="655.0" y="226.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">GM 时间输出</text>
+<text x="655.0" y="243.0" text-anchor="middle" font-size="10" fill="#566">→ 802.1Qbv TAS</text>
+<line x1="540" y1="240" x2="580" y2="230" stroke="#0072BD" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="560.0" y="231.0" text-anchor="middle" font-size="9" fill="#788">ro_gm_time</text>
+<text x="165" y="162" font-size="9" fill="#D95319">TX转发(o_tx_*)</text>
+<text x="165" y="292" font-size="9" fill="#D95319">TX转发(o_tx_*)</text>
+<text x="165" y="422" font-size="9" fill="#D95319">TX转发(o_tx_*)</text>
+</svg>

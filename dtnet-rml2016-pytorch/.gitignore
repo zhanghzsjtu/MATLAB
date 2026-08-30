@@ -1,0 +1,17 @@
+# 数据集（约 2.6 GB，请从 RML2016.10b 官方来源获取后放在仓库根目录）
+dataset2016b.h5
+dataset2016b_small.h5
+
+# 训练产物
+dtnet_best_pytorch.pt
+per_snr_*_pytorch.npz
+confusion_test_pytorch.npz
+
+# 评估/对比中间文件（由 .mat / .npz 派生，非源码）
+per_snr_test_matlab.mat
+train_pytorch_log.txt
+
+# Python
+__pycache__/
+*.pyc
+.venv/

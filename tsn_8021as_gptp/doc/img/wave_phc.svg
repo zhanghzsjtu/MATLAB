@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 334" width="1100" height="334" font-family="Consolas,Menlo,monospace" font-size="13">
+<rect width="1100" height="334" fill="#fbfcfe"/>
+<text x="150" y="26" font-size="16" font-weight="bold" fill="#1f2d3d">PHC 高精度本地时钟: 自由运行计数 + 调相(adjtime)/调频(adjfine)</text>
+<text x="1070" y="26" text-anchor="end" font-size="11" fill="#8a94a6">仿真时间 0..452000 tick</text>
+<line x1="150.0" y1="40" x2="150.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="150.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">0</text>
+<line x1="242.0" y1="40" x2="242.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="242.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">45200</text>
+<line x1="334.0" y1="40" x2="334.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="334.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">90400</text>
+<line x1="426.0" y1="40" x2="426.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="426.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">135600</text>
+<line x1="518.0" y1="40" x2="518.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="518.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">180800</text>
+<line x1="610.0" y1="40" x2="610.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="610.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">226000</text>
+<line x1="702.0" y1="40" x2="702.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="702.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">271200</text>
+<line x1="794.0" y1="40" x2="794.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="794.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">316400</text>
+<line x1="886.0" y1="40" x2="886.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="886.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">361600</text>
+<line x1="978.0" y1="40" x2="978.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="978.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">406800</text>
+<line x1="1070.0" y1="40" x2="1070.0" y2="314" stroke="#e6eaf0" stroke-width="1"/>
+<text x="1070.0" y="328" font-size="9" fill="#aab2c0" text-anchor="middle">452000</text>
+<line x1="150" y1="81.0" x2="1070" y2="81.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="85.0" font-size="12" fill="#33414f" font-weight="bold">time_ns</text>
+<rect x="10" y="50" width="6" height="14" fill="#0072BD"/>
+<path d="M150.0 108.0 L207.0 108.0 L207.0 107.7 L223.3 107.7 L223.3 107.3 L239.6 107.3 L239.6 107.0 L255.8 107.0 L255.8 106.7 L272.1 106.7 L272.1 106.4 L288.4 106.4 L288.4 106.0 L304.7 106.0 L304.7 105.7 L321.0 105.7 L321.0 105.4 L337.3 105.4 L337.3 105.1 L353.5 105.1 L353.5 104.7 L369.8 104.7 L369.8 67.3 L386.1 67.3 L386.1 67.0 L402.4 67.0 L402.4 66.7 L418.7 66.7 L418.7 66.4 L435.0 66.4 L435.0 66.0 L451.2 66.0 L451.2 65.7 L467.5 65.7 L467.5 65.4 L483.8 65.4 L483.8 65.1 L500.1 65.1 L500.1 64.7 L516.4 64.7 L516.4 64.4 L532.7 64.4 L532.7 64.1 L548.9 64.1 L548.9 62.1 L565.2 62.1 L565.2 61.7 L581.5 61.7 L581.5 61.4 L597.8 61.4 L597.8 63.4 L614.1 63.4 L614.1 63.1 L630.4 63.1 L630.4 62.8 L646.6 62.8 L646.6 62.5 L662.9 62.5 L662.9 62.1 L679.2 62.1 L679.2 61.8 L695.5 61.8 L695.5 61.5 L711.8 61.5 L711.8 61.2 L728.1 61.2 L728.1 60.8 L744.3 60.8 L744.3 60.5 L760.6 60.5 L760.6 60.2 L776.9 60.2 L776.9 59.9 L793.2 59.9 L793.2 59.5 L809.5 59.5 L809.5 59.2 L825.8 59.2 L825.8 58.9 L842.0 58.9 L842.0 58.6 L858.3 58.6 L858.3 58.2 L874.6 58.2 L874.6 57.9 L890.9 57.9 L890.9 57.6 L907.2 57.6 L907.2 57.3 L923.5 57.3 L923.5 56.9 L939.7 56.9 L939.7 56.6 L956.0 56.6 L956.0 56.3 L972.3 56.3 L972.3 56.0 L988.6 56.0 L988.6 55.6 L1004.9 55.6 L1004.9 55.3 L1021.2 55.3 L1021.2 55.0 L1037.4 55.0 L1037.4 54.7 L1053.7 54.7 L1053.7 54.3 L1070.0 54.3 L1070.0 54.0 L1070.0 54.0" fill="none" stroke="#0072BD" stroke-width="1.6"/>
+<text x="1070" y="58" text-anchor="end" font-size="9" fill="#aab2c0">[0..1328]</text>
+<line x1="150" y1="167.0" x2="1070" y2="167.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="171.0" font-size="12" fill="#33414f" font-weight="bold">adjtime_wr</text>
+<rect x="10" y="136" width="6" height="14" fill="#D95319"/>
+<path d="M150.0 167.0 L150.0 167.0 L532.7 167.0 L532.7 145.0 L548.9 145.0 L548.9 167.0 L581.5 167.0 L581.5 145.0 L597.8 145.0 L597.8 167.0 L1070.0 167.0" fill="none" stroke="#D95319" stroke-width="1.6"/>
+<line x1="150" y1="253.0" x2="1070" y2="253.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="257.0" font-size="12" fill="#33414f" font-weight="bold">adjfine_wr</text>
+<rect x="10" y="222" width="6" height="14" fill="#2ca02c"/>
+<path d="M150.0 253.0 L150.0 253.0 L630.4 253.0 L630.4 231.0 L646.6 231.0 L646.6 253.0 L923.5 253.0 L923.5 231.0 L939.7 231.0 L939.7 253.0 L1070.0 253.0" fill="none" stroke="#2ca02c" stroke-width="1.6"/>
+</svg>

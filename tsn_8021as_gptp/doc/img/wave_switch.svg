@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 420" width="1100" height="420" font-family="Consolas,Menlo,monospace" font-size="13">
+<rect width="1100" height="420" fill="#fbfcfe"/>
+<text x="150" y="26" font-size="16" font-weight="bold" fill="#1f2d3d">Switch 三端口: 共享 GM 时间基准 + 真实 TX 转发 + servo 仲裁</text>
+<text x="1070" y="26" text-anchor="end" font-size="11" fill="#8a94a6">仿真时间 0..868000 tick</text>
+<line x1="150.0" y1="40" x2="150.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="150.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">0</text>
+<line x1="242.0" y1="40" x2="242.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="242.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">86800</text>
+<line x1="334.0" y1="40" x2="334.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="334.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">173600</text>
+<line x1="426.0" y1="40" x2="426.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="426.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">260400</text>
+<line x1="518.0" y1="40" x2="518.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="518.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">347200</text>
+<line x1="610.0" y1="40" x2="610.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="610.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">434000</text>
+<line x1="702.0" y1="40" x2="702.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="702.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">520800</text>
+<line x1="794.0" y1="40" x2="794.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="794.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">607600</text>
+<line x1="886.0" y1="40" x2="886.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="886.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">694400</text>
+<line x1="978.0" y1="40" x2="978.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="978.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">781200</text>
+<line x1="1070.0" y1="40" x2="1070.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="1070.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">868000</text>
+<line x1="150" y1="81.0" x2="1070" y2="81.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="85.0" font-size="12" fill="#33414f" font-weight="bold">gm_time_ns</text>
+<rect x="10" y="50" width="6" height="14" fill="#0072BD"/>
+<path d="M150.0 108.0 L179.7 108.0 L179.7 107.5 L188.2 107.5 L188.2 107.0 L196.6 107.0 L196.6 106.5 L205.1 106.5 L205.1 105.9 L213.6 105.9 L213.6 105.4 L222.1 105.4 L222.1 104.9 L230.6 104.9 L230.6 104.4 L239.0 104.4 L239.0 103.9 L247.5 103.9 L247.5 103.4 L256.0 103.4 L256.0 102.9 L264.5 102.9 L264.5 102.3 L272.9 102.3 L272.9 101.8 L281.4 101.8 L281.4 101.3 L289.9 101.3 L289.9 100.8 L298.4 100.8 L298.4 100.3 L306.9 100.3 L306.9 99.8 L315.3 99.8 L315.3 99.3 L323.8 99.3 L323.8 98.7 L332.3 98.7 L332.3 98.2 L340.8 98.2 L340.8 97.7 L349.3 97.7 L349.3 97.2 L357.7 97.2 L357.7 96.7 L366.2 96.7 L366.2 96.2 L374.7 96.2 L374.7 95.7 L383.2 95.7 L383.2 95.1 L391.7 95.1 L391.7 94.6 L400.1 94.6 L400.1 94.1 L408.6 94.1 L408.6 93.6 L417.1 93.6 L417.1 93.1 L425.6 93.1 L425.6 92.6 L434.1 92.6 L434.1 92.1 L442.5 92.1 L442.5 91.5 L451.0 91.5 L451.0 91.0 L459.5 91.0 L459.5 90.5 L468.0 90.5 L468.0 90.0 L476.5 90.0 L476.5 89.5 L484.9 89.5 L484.9 89.0 L493.4 89.0 L493.4 88.5 L501.9 88.5 L501.9 87.9 L510.4 87.9 L510.4 87.4 L518.8 87.4 L518.8 86.9 L527.3 86.9 L527.3 86.4 L535.8 86.4 L535.8 85.9 L544.3 85.9 L544.3 85.4 L552.8 85.4 L552.8 84.9 L561.2 84.9 L561.2 84.3 L569.7 84.3 L569.7 83.8 L578.2 83.8 L578.2 83.3 L586.7 83.3 L586.7 82.8 L595.2 82.8 L595.2 82.3 L603.6 82.3 L603.6 81.8 L612.1 81.8 L612.1 81.3 L620.6 81.3 L620.6 80.7 L629.1 80.7 L629.1 80.2 L637.6 80.2 L637.6 79.7 L646.0 79.7 L646.0 79.2 L654.5 79.2 L654.5 78.7 L663.0 78.7 L663.0 78.2 L671.5 78.2 L671.5 77.7 L680.0 77.7 L680.0 77.1 L688.4 77.1 L688.4 76.6 L696.9 76.6 L696.9 76.1 L705.4 76.1 L705.4 75.6 L713.9 75.6 L713.9 75.1 L722.4 75.1 L722.4 74.6 L730.8 74.6 L730.8 74.1 L739.3 74.1 L739.3 73.5 L747.8 73.5 L747.8 73.0 L756.3 73.0 L756.3 72.5 L764.7 72.5 L764.7 72.0 L773.2 72.0 L773.2 71.5 L781.7 71.5 L781.7 71.0 L790.2 71.0 L790.2 70.5 L798.7 70.5 L798.7 69.9 L807.1 69.9 L807.1 69.4 L815.6 69.4 L815.6 68.9 L824.1 68.9 L824.1 68.4 L832.6 68.4 L832.6 67.9 L841.1 67.9 L841.1 67.4 L849.5 67.4 L849.5 66.9 L858.0 66.9 L858.0 66.3 L866.5 66.3 L866.5 65.8 L875.0 65.8 L875.0 65.3 L883.5 65.3 L883.5 64.8 L891.9 64.8 L891.9 64.3 L900.4 64.3 L900.4 63.8 L908.9 63.8 L908.9 63.3 L917.4 63.3 L917.4 62.7 L925.9 62.7 L925.9 62.2 L934.3 62.2 L934.3 61.7 L942.8 61.7 L942.8 61.2 L951.3 61.2 L951.3 60.7 L959.8 60.7 L959.8 60.2 L968.2 60.2 L968.2 59.7 L976.7 59.7 L976.7 59.1 L985.2 59.1 L985.2 58.6 L993.7 58.6 L993.7 58.1 L1002.2 58.1 L1002.2 57.6 L1010.6 57.6 L1010.6 57.1 L1019.1 57.1 L1019.1 56.6 L1027.6 56.6 L1027.6 56.1 L1044.6 56.1 L1044.6 55.5 L1053.0 55.5 L1053.0 55.0 L1061.5 55.0 L1061.5 54.5 L1070.0 54.5 L1070.0 54.0 L1070.0 54.0" fill="none" stroke="#0072BD" stroke-width="1.6"/>
+<text x="1070" y="58" text-anchor="end" font-size="9" fill="#aab2c0">[0..840]</text>
+<line x1="150" y1="167.0" x2="1070" y2="167.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="171.0" font-size="12" fill="#33414f" font-weight="bold">tx_vld(转发流)</text>
+<rect x="10" y="136" width="6" height="14" fill="#D95319"/>
+<path d="M150.0 167.0 L150.0 167.0 L179.7 167.0 L179.7 145.0 L230.6 145.0 L230.6 167.0 L586.7 167.0 L586.7 145.0 L739.3 145.0 L739.3 167.0 L1070.0 167.0" fill="none" stroke="#D95319" stroke-width="1.6"/>
+<line x1="150" y1="253.0" x2="1070" y2="253.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="257.0" font-size="12" fill="#33414f" font-weight="bold">phc_adjtime_wr(仲裁)</text>
+<rect x="10" y="222" width="6" height="14" fill="#2ca02c"/>
+<path d="M150.0 253.0 L150.0 253.0 L1019.1 253.0 L1019.1 231.0 L1027.6 231.0 L1027.6 253.0 L1070.0 253.0" fill="none" stroke="#2ca02c" stroke-width="1.6"/>
+<line x1="150" y1="339.0" x2="1070" y2="339.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="343.0" font-size="12" fill="#33414f" font-weight="bold">is_gm</text>
+<rect x="10" y="308" width="6" height="14" fill="#9467bd"/>
+<path d="M150.0 339.0 L150.0 317.0 L1070.0 317.0" fill="none" stroke="#9467bd" stroke-width="1.6"/>
+</svg>

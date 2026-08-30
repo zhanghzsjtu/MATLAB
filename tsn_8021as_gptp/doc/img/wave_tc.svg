@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 420" width="1100" height="420" font-family="Consolas,Menlo,monospace" font-size="13">
+<rect width="1100" height="420" fill="#fbfcfe"/>
+<text x="150" y="26" font-size="16" font-weight="bold" fill="#1f2d3d">透明时钟 TC: pkt_vld -> cf_wr/cf_rd 脉冲, cf_out 改写</text>
+<text x="1070" y="26" text-anchor="end" font-size="11" fill="#8a94a6">仿真时间 0..208000 tick</text>
+<line x1="150.0" y1="40" x2="150.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="150.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">0</text>
+<line x1="242.0" y1="40" x2="242.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="242.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">20800</text>
+<line x1="334.0" y1="40" x2="334.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="334.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">41600</text>
+<line x1="426.0" y1="40" x2="426.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="426.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">62400</text>
+<line x1="518.0" y1="40" x2="518.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="518.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">83200</text>
+<line x1="610.0" y1="40" x2="610.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="610.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">104000</text>
+<line x1="702.0" y1="40" x2="702.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="702.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">124800</text>
+<line x1="794.0" y1="40" x2="794.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="794.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">145600</text>
+<line x1="886.0" y1="40" x2="886.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="886.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">166400</text>
+<line x1="978.0" y1="40" x2="978.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="978.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">187200</text>
+<line x1="1070.0" y1="40" x2="1070.0" y2="400" stroke="#e6eaf0" stroke-width="1"/>
+<text x="1070.0" y="414" font-size="9" fill="#aab2c0" text-anchor="middle">208000</text>
+<line x1="150" y1="81.0" x2="1070" y2="81.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="85.0" font-size="12" fill="#33414f" font-weight="bold">pkt_vld</text>
+<rect x="10" y="50" width="6" height="14" fill="#0072BD"/>
+<path d="M150.0 81.0 L150.0 81.0 L238.5 81.0 L238.5 59.0 L273.8 59.0 L273.8 81.0 L486.2 81.0 L486.2 59.0 L521.5 59.0 L521.5 81.0 L733.8 81.0 L733.8 59.0 L769.2 59.0 L769.2 81.0 L840.0 81.0 L840.0 59.0 L893.1 59.0 L893.1 81.0 L946.2 81.0 L946.2 59.0 L999.2 59.0 L999.2 81.0 L1016.9 81.0 L1016.9 59.0 L1070.0 59.0 L1070.0 81.0 L1070.0 81.0" fill="none" stroke="#0072BD" stroke-width="1.6"/>
+<line x1="150" y1="167.0" x2="1070" y2="167.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="171.0" font-size="12" fill="#33414f" font-weight="bold">cf_wr(one-step)</text>
+<rect x="10" y="136" width="6" height="14" fill="#D95319"/>
+<path d="M150.0 167.0 L150.0 167.0 L238.5 167.0 L238.5 145.0 L273.8 145.0 L273.8 167.0 L486.2 167.0 L486.2 145.0 L521.5 145.0 L521.5 167.0 L733.8 167.0 L733.8 145.0 L769.2 145.0 L769.2 167.0 L840.0 167.0 L840.0 145.0 L910.8 145.0 L910.8 167.0 L946.2 167.0 L946.2 145.0 L1070.0 145.0" fill="none" stroke="#D95319" stroke-width="1.6"/>
+<line x1="150" y1="253.0" x2="1070" y2="253.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="257.0" font-size="12" fill="#33414f" font-weight="bold">cf_rd(two-step)</text>
+<rect x="10" y="222" width="6" height="14" fill="#2ca02c"/>
+<path d="M150.0 253.0 L150.0 253.0 L1070.0 253.0" fill="none" stroke="#2ca02c" stroke-width="1.6"/>
+<line x1="150" y1="339.0" x2="1070" y2="339.0" stroke="#eef1f5" stroke-width="1"/>
+<text x="10" y="343.0" font-size="12" fill="#33414f" font-weight="bold">cf_out</text>
+<rect x="10" y="308" width="6" height="14" fill="#9467bd"/>
+<path d="M150.0 366.0 L238.5 366.0 L238.5 365.9 L486.2 365.9 L486.2 318.6 L733.8 318.6 L733.8 312.0 L840.0 312.0 L840.0 312.0 L1070.0 312.0" fill="none" stroke="#9467bd" stroke-width="1.6"/>
+<text x="1070" y="316" text-anchor="end" font-size="9" fill="#aab2c0">[0..10159080]</text>
+</svg>

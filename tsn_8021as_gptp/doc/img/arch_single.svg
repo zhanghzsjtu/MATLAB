@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 560" width="940" height="560" font-family="Consolas,Menlo,monospace">
+<defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa7b8"/></marker></defs>
+<text x="20" y="26" font-size="16" font-weight="bold" fill="#1f2d3d">单端口架构数据流 (gptp_top: MAC 进 → 时间同步 → MAC 出)</text>
+<rect x="30" y="250" width="110" height="60" rx="8" fill="#eaf1fb" stroke="#0072BD" stroke-width="2"/>
+<text x="85.0" y="276.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">MAC RX</text>
+<text x="85.0" y="293.0" text-anchor="middle" font-size="10" fill="#566">i_rx_* 字节流</text>
+<rect x="180" y="250" width="120" height="60" rx="8" fill="#e6f7fa" stroke="#17becf" stroke-width="2"/>
+<text x="240.0" y="276.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">mac_glue</text>
+<text x="240.0" y="293.0" text-anchor="middle" font-size="10" fill="#566">0x88F7解析/SOF</text>
+<line x1="140" y1="280" x2="180" y2="280" stroke="#17becf" stroke-width="1.6" marker-end="url(#ah)"/>
+<rect x="350" y="60" width="130" height="56" rx="8" fill="#e9f7ec" stroke="#2ca02c" stroke-width="2"/>
+<text x="415.0" y="84.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">htsu</text>
+<text x="415.0" y="101.0" text-anchor="middle" font-size="10" fill="#566">t2/t3打标</text>
+<rect x="350" y="160" width="130" height="56" rx="8" fill="#fdeee2" stroke="#D95319" stroke-width="2"/>
+<text x="415.0" y="184.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">tc</text>
+<text x="415.0" y="201.0" text-anchor="middle" font-size="10" fill="#566">CF改写</text>
+<rect x="350" y="360" width="130" height="56" rx="8" fill="#f3eafb" stroke="#9467bd" stroke-width="2"/>
+<text x="415.0" y="384.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">pdelay</text>
+<text x="415.0" y="401.0" text-anchor="middle" font-size="10" fill="#566">P2P延迟</text>
+<rect x="560" y="220" width="130" height="70" rx="8" fill="#eaf1fb" stroke="#0072BD" stroke-width="2"/>
+<text x="625.0" y="251.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">PHC</text>
+<text x="625.0" y="268.0" text-anchor="middle" font-size="10" fill="#566">共享时间基准</text>
+<rect x="560" y="360" width="130" height="56" rx="8" fill="#fbe9f4" stroke="#e377c2" stroke-width="2"/>
+<text x="625.0" y="384.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">bmca</text>
+<text x="625.0" y="401.0" text-anchor="middle" font-size="10" fill="#566">角色选举</text>
+<rect x="740" y="220" width="120" height="70" rx="8" fill="#fff0e0" stroke="#ff7f0e" stroke-width="2"/>
+<text x="800.0" y="251.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">servo</text>
+<text x="800.0" y="268.0" text-anchor="middle" font-size="10" fill="#566">PI闭环</text>
+<rect x="740" y="360" width="120" height="60" rx="8" fill="#eaf1fb" stroke="#0072BD" stroke-width="2"/>
+<text x="800.0" y="386.0" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f2d3d">MAC TX</text>
+<text x="800.0" y="403.0" text-anchor="middle" font-size="10" fill="#566">o_tx_* 出帧</text>
+<line x1="300" y1="275" x2="360" y2="95" stroke="#2ca02c" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="330.0" y="181.0" text-anchor="middle" font-size="9" fill="#788">SOF</text>
+<line x1="300" y1="280" x2="360" y2="188" stroke="#D95319" stroke-width="1.6" marker-end="url(#ah)"/>
+<line x1="300" y1="295" x2="360" y2="388" stroke="#9467bd" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="330.0" y="337.5" text-anchor="middle" font-size="9" fill="#788">Pdelay</text>
+<line x1="480" y1="88" x2="560" y2="235" stroke="#2ca02c" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="520.0" y="157.5" text-anchor="middle" font-size="9" fill="#788">ts</text>
+<line x1="480" y1="188" x2="560" y2="250" stroke="#D95319" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="520.0" y="215.0" text-anchor="middle" font-size="9" fill="#788">res</text>
+<line x1="480" y1="388" x2="560" y2="285" stroke="#9467bd" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="520.0" y="332.5" text-anchor="middle" font-size="9" fill="#788">peerDelay</text>
+<line x1="560" y1="388" x2="740" y2="255" stroke="#e377c2" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="650.0" y="317.5" text-anchor="middle" font-size="9" fill="#788">role</text>
+<line x1="740" y1="255" x2="690" y2="255" stroke="#ff7f0e" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="715.0" y="251.0" text-anchor="middle" font-size="9" fill="#788">adjtime/adjfine</text>
+<line x1="620" y1="250" x2="690" y2="320" stroke="#0072BD" stroke-width="1.6" marker-end="url(#ah)"/>
+<line x1="690" y1="360" x2="740" y2="380" stroke="#D95319" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="715.0" y="366.0" text-anchor="middle" font-size="9" fill="#788">CF</text>
+<line x1="800" y1="290" x2="800" y2="360" stroke="#0072BD" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="800.0" y="321.0" text-anchor="middle" font-size="9" fill="#788">sync</text>
+<text x="560" y="345" font-size="10" fill="#788">↑ Announce(i_announce_rx)</text>
+<text x="740" y="205" font-size="10" fill="#788">↑ Sync(i_sync_rx)</text>
+</svg>
